@@ -1,0 +1,1669 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>St. Matthew SCC | Treasury, Members & Attendance Register</title>
+
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="{% static 'js/tailwind.js' %}"></script>
+  <script src="{% static 'js/lucide.min.js' %}"></script>
+
+  <!-- Google Fonts: Inter & Cinzel for Liturgical Dignity -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            marian: {
+              950: '#0A1220',
+              900: '#0F1E36',
+              850: '#142746',
+              800: '#1E3A8A',
+              700: '#2563EB',
+              100: '#DBEAFE',
+              50: '#EFF6FF',
+            },
+            liturgical: {
+              gold: '#D97706',
+              amber: '#F59E0B',
+              warm: '#FEF3C7',
+              accent: '#B45309'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            cinzel: ['Cinzel', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        color: black;
+        display: block !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    .glass-nav {
+      background: rgba(15, 30, 54, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #94a3b8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen selection:bg-amber-100 selection:text-amber-900 flex flex-col">
+
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-marian-950 focus:shadow-lg">Skip to main content</a>
+
+  <!-- TOP LITURGICAL STATUS BAR -->
+  <aside aria-label="Liturgical Banner" class="no-print bg-marian-950 text-slate-300 text-xs py-2 px-4 border-b border-marian-850">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="currentDateBadge" class="font-medium text-slate-200">Catholic Campus Ministry • St. Augustine Chaplaincy Catholic Church</span>
+      </div>
+      <div class="flex items-center space-x-3 text-[11px] sm:text-xs">
+        <span class="text-amber-400 flex items-center gap-1 font-semibold">
+          <i data-lucide="cross" class="w-3.5 h-3.5"></i> St. Matthew SCC Jumuiya
+        </span>
+        <span class="text-slate-500 hidden sm:inline">•</span>
+        <span class="text-slate-300">Financial Stewardship & Attendance</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- NAVIGATION BAR -->
+  <header class="no-print glass-nav sticky top-0 z-40 border-b border-white/10 shadow-lg text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <a href="{% url 'index' %}" class="flex items-center space-x-3 group">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-md shadow-amber-500/20 border border-amber-300/40 text-marian-950 font-cinzel font-black text-xl group-hover:scale-105 transition">
+          M
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-cinzel font-bold text-base sm:text-lg tracking-wide text-white group-hover:text-amber-300 transition">St. Matthew SCC</span>
+          </div>
+          <p class="text-[11px] text-slate-300 font-light">Treasury, Directory & Attendance Register</p>
+        </div>
+      </a>
+
+      <!-- Leader Authentication / Lock Controls -->
+      <div class="flex items-center space-x-2">
+        <button id="leaderStatusBtn" onclick="toggleLeaderAuthModal()" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-marian-950 font-bold text-xs shadow-md shadow-amber-500/20 active:scale-95 transition flex items-center space-x-1.5">
+          <i data-lucide="lock" class="w-3.5 h-3.5" id="lockIcon"></i>
+          <span id="lockBtnLabel">Leader Login</span>
+        </button>
+
+        <button onclick="window.print()" title="Print Financial & Attendance Report" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs transition border border-white/10">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <nav aria-label="Main pages" class="no-print border-b border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2">
+      <ul class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+        <li><a href="{% url 'index' %}" class="inline-flex rounded-lg px-3 py-2 text-marian-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">Home &amp; Liturgy</a></li>
+        <li><a href="{% url 'calendar' %}" class="inline-flex rounded-lg px-3 py-2 text-marian-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">Calendar &amp; Venues</a></li>
+        <li><a href="{% url 'treasury' %}" aria-current="page" class="inline-flex rounded-lg bg-marian-900 px-3 py-2 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">Treasury &amp; Register <span class="sr-only">(current page)</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO & FINANCIAL DASHBOARD OVERVIEW ==================== -->
+  <section class="no-print bg-gradient-to-b from-marian-900 via-marian-850 to-marian-800 text-white pt-8 pb-14 px-4">
+    <div class="max-w-7xl mx-auto space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-semibold mb-3">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            St. Matthew SCC Transparency & Stewardship Hub
+          </span>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-cinzel tracking-tight text-white">
+            Financial Ledger & Member Register
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+            Track semestral contribution (KES 400), Sunday animation levies (KES 100), roll-call records for weekly services, and verified M-Pesa receipts.
+          </p>
+        </div>
+
+        <!-- Quick Top Actions -->
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="semesterSelector" onchange="switchSemester(this.value)" class="bg-white/10 text-white text-xs font-semibold px-3 py-2 rounded-xl border border-white/20 focus:outline-hidden focus:ring-2 focus:ring-amber-400">
+            <option value="2026/2027-1" class="text-slate-900">2026/2027 Semester 1</option>
+            <option value="2026/2027-2" class="text-slate-900">2026/2027 Semester 2</option>
+            <option value="2027/2028-1" class="text-slate-900">2027/2028 Semester 1</option>
+            <option value="2027/2028-2" class="text-slate-900">2027/2028 Semester 2</option>
+            <option value="2028/2029-1" class="text-slate-900">2028/2029 Semester 1</option>
+            <option value="2028/2029-2" class="text-slate-900">2028/2029 Semester 2</option>
+          </select>
+
+          <button onclick="openPaymentModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-marian-950 text-xs font-bold shadow-md transition flex items-center space-x-1.5 active:scale-95">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+            <span>Log Payment</span>
+          </button>
+
+          <button onclick="exportContributionsCSV()" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition flex items-center space-x-1.5">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-amber-300"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Core Financial Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Semestral Dues Collected -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-amber-300">Semestral Contribution</span>
+              <i data-lucide="landmark" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white" id="statSemestralAmount">KES 0</h2>
+            <p class="text-[11px] text-slate-300 mt-0.5" id="statSemestralTarget">Target: KES 13,600</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Progress:</span>
+            <span id="statSemestralRate" class="font-bold text-amber-300">0%</span>
+          </div>
+        </article>
+
+        <!-- Animation Fund Collected -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-emerald-300">Animation Fee</span>
+              <i data-lucide="music" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white" id="statAnimationAmount">KES 0</h2>
+            <p class="text-[11px] text-slate-300 mt-0.5" id="statAnimationTarget">Target: KES 3,400</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Progress:</span>
+            <span id="statAnimationRate" class="font-bold text-emerald-300">0%</span>
+          </div>
+        </article>
+
+        <!-- Overall Collection Rate -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-blue-300">Collection Efficiency</span>
+              <i data-lucide="pie-chart" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white" id="statOverallEfficiency">0%</h2>
+            <p class="text-[11px] text-slate-300 mt-0.5" id="statTotalCollected">Total: KES 0 / 17,000</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Treasury Status:</span>
+            <span class="font-bold text-emerald-300">Audited & Active</span>
+          </div>
+        </article>
+
+        <!-- Active Contributing Members -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-purple-300">Contributing Members</span>
+              <i data-lucide="users" class="w-4 h-4 text-purple-400"></i>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white" id="statActiveMembers">0 / 34</h2>
+            <p class="text-[11px] text-slate-300 mt-0.5" id="statFullyPaidCount">0 Members Fully Cleared</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Participation:</span>
+            <span id="statParticipationRate" class="font-bold text-purple-300">0%</span>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Dual Visual Progress Bars -->
+      <div class="bg-white/10 rounded-2xl p-5 border border-white/15 backdrop-blur-md space-y-4">
+        
+        <!-- Semestral Dues Bar -->
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-semibold text-slate-200">Semestral contribution (KES 400 per member)</span>
+            <span class="font-mono text-amber-300 font-bold" id="barSemestralText">KES 0 / 0 (0%)</span>
+          </div>
+          <div class="w-full bg-black/30 rounded-full h-3 overflow-hidden p-0.5">
+            <div id="barSemestralFill" class="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Animation Dues Bar -->
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-semibold text-slate-200">Mass Animation Levy (KES 100 per member)</span>
+            <span class="font-mono text-emerald-300 font-bold" id="barAnimationText">KES 0 / 0 (0%)</span>
+          </div>
+          <div class="w-full bg-black/30 rounded-full h-3 overflow-hidden p-0.5">
+            <div id="barAnimationFill" class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== MAIN WORKSPACE WITH 3 CORE MODULE TABS ==================== -->
+  <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 -mt-6 space-y-8 pb-24 w-full flex-1">
+
+    <!-- Section Switcher Tabs -->
+    <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm flex items-center gap-1 overflow-x-auto custom-scrollbar">
+      <button onclick="switchMainTab('ledger')" id="tabBtnLedger" class="flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-bold bg-marian-900 text-amber-300 shadow-xs transition flex items-center justify-center gap-2">
+        <i data-lucide="receipt" class="w-4 h-4"></i>
+        <span>Contribution Ledger</span>
+      </button>
+
+      <button onclick="switchMainTab('attendance')" id="tabBtnAttendance" class="flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2">
+        <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+        <span>Roll-Call Attendance</span>
+      </button>
+
+      <button onclick="switchMainTab('directory')" id="tabBtnDirectory" class="flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span>Member Directory</span>
+      </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 1: CONTRIBUTION LEDGER (SEMESTRAL & ANIMATION CONTRIBUTIONS)        -->
+    <!-- ========================================================================= -->
+    <section id="moduleLedger" class="space-y-4">
+      
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-amber-100 text-amber-900">
+                <i data-lucide="wallet-cards" class="w-4 h-4"></i>
+              </span>
+              <h2 class="text-lg sm:text-xl font-bold font-cinzel text-marian-900">
+                Official Financial Contribution Ledger
+              </h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Transparent recording of semestral contribution (KES 400), Mass animation fee (KES 100), and verified receipt numbers.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="openPaymentModal()" class="px-3.5 py-2 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-xs transition flex items-center space-x-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Record New Payment</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters & Search Toolbar -->
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          
+          <!-- Category and Status Selectors -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <select id="ledgerCategoryFilter" onchange="filterLedger()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:ring-2 focus:ring-marian-600 focus:outline-hidden">
+              <option value="all">All Contribution Types</option>
+              <option value="Semestral Dues">Semestral contribution (KES 400)</option>
+              <option value="Animation Levy">Mass Animation fee (KES 100)</option>
+              <option value="Special Welfare">Special Welfare</option>
+            </select>
+
+            <select id="ledgerStatusFilter" onchange="filterLedger()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:ring-2 focus:ring-marian-600 focus:outline-hidden">
+              <option value="all">All Payment Statuses</option>
+              <option value="Paid">Fully Paid</option>
+              <option value="Partial">Partially Paid</option>
+              <option value="Pending">Pending / Unpaid</option>
+            </select>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative w-full lg:w-72">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input type="text" id="ledgerSearchInput" oninput="filterLedger()" placeholder="Search member, phone, receipt..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-marian-600">
+          </div>
+
+        </div>
+
+        <!-- Ledger Table Container -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100/80 text-slate-700 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+              <tr>
+                <th class="p-3">Member & Details</th>
+                <th class="p-3">Contribution Type</th>
+                <th class="p-3">Expected</th>
+                <th class="p-3">Paid</th>
+                <th class="p-3">Balance</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">M-Pesa / Receipt</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ledgerTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Pagination / Status Summary -->
+        <div class="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 pt-2">
+          <span id="ledgerCountSummary">Showing 0 entries</span>
+          <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+            <button onclick="shareTreasurerSummary()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share Treasury Summary on WhatsApp
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 2: ROLL-CALL ATTENDANCE REGISTER                                   -->
+    <!-- ========================================================================= -->
+    <section id="moduleAttendance" class="space-y-4 hidden">
+      
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-blue-100 text-marian-900">
+                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+              </span>
+              <h2 class="text-lg sm:text-xl font-bold font-cinzel text-marian-900">
+                Weekly Meeting Attendance Roll-Call
+              </h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Roll-call register for Wednesday SCC Fellowships (7:30 PM - 9:30 PM).
+            </p>
+          </div>
+
+          <!-- Attendance Date & Service Switcher -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div>
+              <input type="date" id="attendanceDatePicker" onchange="loadAttendanceForSelectedDate()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:ring-2 focus:ring-marian-600 focus:outline-hidden">
+            </div>
+            <select id="attendanceServiceType" onchange="loadAttendanceForSelectedDate()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-semibold text-slate-700 focus:ring-2 focus:ring-marian-600 focus:outline-hidden">
+              <option value="Wednesday SCC Fellowship">Wednesday SCC Fellowship</option>
+              <option value="Sunday Mass Animation">Sunday Mass Animation</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Attendance Metrics Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-500 block">Total Members</span>
+            <span class="text-base font-black text-slate-800" id="attTotalMembers">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-emerald-600 block">Present</span>
+            <span class="text-base font-black text-emerald-700" id="attPresentCount">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-amber-600 block">Apology</span>
+            <span class="text-base font-black text-amber-700" id="attApologyCount">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-rose-600 block">Absent</span>
+            <span class="text-base font-black text-rose-700" id="attAbsentCount">0</span>
+          </div>
+        </div>
+
+        <!-- Attendance List -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100/80 text-slate-700 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+              <tr>
+                <th class="p-3">#</th>
+                <th class="p-3">Member Name & Role</th>
+                <th class="p-3">Year / Contact</th>
+                <th class="p-3 text-center">Attendance Status</th>
+                <th class="p-3">Secretary Remarks</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          <span class="text-xs text-slate-500">Live attendance percentage: <strong id="attRateBadge" class="text-emerald-700">0%</strong></span>
+          <div class="flex items-center space-x-2">
+            <button onclick="markAllPresent()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Mark All Present</button>
+            <button onclick="shareAttendanceReport()" class="px-3.5 py-1.5 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-xs transition flex items-center gap-1">
+              <i data-lucide="share" class="w-3.5 h-3.5"></i>
+              <span>WhatsApp Roll-Call</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 3: MEMBER DIRECTORY & LEADERSHIP ROLES                             -->
+    <!-- ========================================================================= -->
+    <section id="moduleDirectory" class="space-y-4 hidden">
+      
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-emerald-100 text-emerald-900">
+                <i data-lucide="users" class="w-4 h-4"></i>
+              </span>
+              <h2 class="text-lg sm:text-xl font-bold font-cinzel text-marian-900">
+                Community Directory & Leadership Registry
+              </h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Roster of registered members, executive officers, academic cohorts, and direct communication contacts.
+            </p>
+          </div>
+
+          <button onclick="openMemberModal()" class="self-start md:self-auto px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center space-x-1.5">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>Register New Member</span>
+          </button>
+        </div>
+
+        <!-- Search Bar and Role Filter -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          <div class="flex items-center gap-1.5">
+            <button onclick="filterMembersByRole('all')" id="roleFilterAll" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-marian-900 text-white">All Members</button>
+            <button onclick="filterMembersByRole('leader')" id="roleFilterLeader" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Executives Only</button>
+            <button onclick="filterMembersByRole('general')" id="roleFilterGeneral" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">General Members</button>
+          </div>
+
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input type="text" id="memberSearchInput" oninput="renderMemberCards()" placeholder="Search member, role, year..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-marian-600">
+          </div>
+        </div>
+
+        <!-- Member Profile Cards Grid -->
+        <div id="memberCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+          <!-- Rendered via JavaScript -->
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== RECORD / EDIT PAYMENT MODAL ==================== -->
+  <div id="paymentModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+            Treasurer Control
+          </span>
+          <h3 class="text-base font-bold font-cinzel text-marian-900 mt-1">Record Contribution Payment</h3>
+        </div>
+        <button onclick="closePaymentModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="paymentForm" onsubmit="savePaymentRecord(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Member</label>
+          <select id="payMemberSelect" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Contribution Type</label>
+            <select id="payContributionType" onchange="autoFillExpectedAmount()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+              <option value="Semestral Dues">Semestral contribution (KES 400)</option>
+              <option value="Animation Levy">Mass Animation Fee (KES 100)</option>
+              <option value="Special Welfare">Special Welfare</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Expected Amount (KES)</label>
+            <input type="number" id="payExpectedAmount" value="400" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-slate-50 font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Amount Paid (KES)</label>
+            <input type="number" id="payPaidAmount" required placeholder="400" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Payment Method</label>
+            <select id="payMethod" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+              <option value="M-Pesa">M-Pesa</option>
+              <option value="Cash">Cash to Treasurer</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">M-Pesa Reference / Receipt Code</label>
+          <input type="text" id="payReceiptCode" placeholder="e.g., QKJ93H87XX" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-mono uppercase">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Date Paid</label>
+          <input type="date" id="payDate" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Notes / Remarks</label>
+          <input type="text" id="payRemarks" placeholder="Optional remark (e.g., Cleared via Treasurer Mercy)" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-3 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-md transition">
+            Save Record to Ledger & Update Totals
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ==================== ADD / REGISTER MEMBER MODAL ==================== -->
+  <div id="memberModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+            Secretary Registry
+          </span>
+          <h3 class="text-base font-bold font-cinzel text-marian-900 mt-1">Register New Community Member</h3>
+        </div>
+        <button onclick="closeMemberModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="memberForm" onsubmit="saveNewMember(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Legal / Christian Name</label>
+          <input type="text" id="newMemberName" required placeholder="e.g., Francis Mwangi" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Phone Number (WhatsApp)</label>
+            <input type="tel" id="newMemberPhone" placeholder="0712345678" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Reg / Student Number</label>
+            <input type="text" id="newMemberReg" placeholder="IC211-0021/2024" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white uppercase">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Year of Study</label>
+            <select id="newMemberYear" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+              <option value="Year 1">Year 1</option>
+              <option value="Year 2">Year 2</option>
+              <option value="Year 3" selected>Year 3</option>
+              <option value="Year 4">Year 4</option>
+              <option value="Year 5">Year 5</option>
+              <option value="Associate / Alumni">Associate / Alumni</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Leadership Role</label>
+            <select id="newMemberRole" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+              <option value="Member">General Member</option>
+              <option value="Chairperson">Chairperson</option>
+              <option value="Vice Chairperson">Vice Chairperson</option>
+              <option value="Secretary">Secretary</option>
+              <option value="Treasurer">Treasurer</option>
+              <option value="Liturgist">Liturgist</option>
+              <option value="Organising Secretary">Organising Secretary</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Hostel / Campus Residence</label>
+          <input type="text" id="newMemberHostel" placeholder="e.g., Hall 4 Room 12 / Off-Campus Voi" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition">
+            Add to Community Register
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ==================== LEADER PASSKEY AUTHENTICATION MODAL ==================== -->
+  <div id="authModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative space-y-4 text-center">
+      
+      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center mx-auto">
+        <i data-lucide="key" class="w-6 h-6"></i>
+      </div>
+
+      <div>
+        <h3 class="text-base font-bold font-cinzel text-marian-900">Executive Leader Authentication</h3>
+        <p class="text-xs text-slate-500 mt-1">Enter executive passkey to record payments, modify attendance, and register members.</p>
+      </div>
+
+      <div class="py-2">
+        <input type="password" id="authPinInput" maxlength="4" placeholder="••••" class="w-36 mx-auto text-center text-2xl tracking-widest font-mono p-3 rounded-2xl border border-slate-300 focus:ring-2 focus:ring-marian-600 focus:outline-hidden">
+        <p class="text-[11px] text-slate-400 mt-2">Executive Passkey default: <strong class="underline">1234</strong></p>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button onclick="closeAuthModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition">Cancel</button>
+        <button onclick="submitLeaderPin()" class="flex-1 py-2.5 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-md transition">Unlock</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== PRINT AREA FOR AUDIT & REPORTS ==================== -->
+  <div id="printArea" class="hidden p-8 max-w-4xl mx-auto">
+    <div class="text-center border-b-2 border-black pb-4 mb-6">
+      <h1 class="text-2xl font-bold font-cinzel uppercase tracking-wider">St. Matthew Small Christian Community</h1>
+      <h2 class="text-lg font-semibold">Treasury Contribution Audit & Attendance Summary</h2>
+      <p class="text-sm italic">Taita Taveta University Catholic Chaplaincy • St. Augustine Chaplaincy</p>
+      <p class="text-xs text-slate-600 mt-1">Generated: <span id="printDateAudit"></span> | Semester: <span id="printSemesterAudit">2026/2027-1</span></p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-6 text-xs border p-3 border-black">
+      <div>
+        <p><strong>Semestral Contribution Target:</strong> <span id="printSemestralTarget">KES 0</span></p>
+        <p><strong>Total Semestral Contribution Collected:</strong> <span id="printSemestralCollected">KES 0</span></p>
+      </div>
+      <div>
+        <p><strong>Animation Fee Target:</strong> <span id="printAnimationTarget">KES 0</span></p>
+        <p><strong>Total Animation Fee Collected:</strong> <span id="printAnimationCollected">KES 0</span></p>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="font-bold text-sm border-b border-black mb-2 uppercase">Verified Contribution Ledger</h3>
+      <table class="w-full text-left text-[11px] border border-collapse border-black">
+        <thead>
+          <tr class="bg-gray-100 border-b border-black">
+            <th class="p-1.5 border-r border-black">Member Name</th>
+            <th class="p-1.5 border-r border-black">Category</th>
+            <th class="p-1.5 border-r border-black">Expected</th>
+            <th class="p-1.5 border-r border-black">Paid</th>
+            <th class="p-1.5 border-r border-black">Balance</th>
+            <th class="p-1.5 border-r border-black">Status</th>
+            <th class="p-1.5">Receipt Code</th>
+          </tr>
+        </thead>
+        <tbody id="printLedgerBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8 pt-4 border-t border-black text-xs flex justify-between">
+      <div>
+        <p>Prepared By: ___________________________</p>
+        <p class="text-[10px] text-slate-600">Miss. Mercy Gacheri (Treasurer)</p>
+      </div>
+      <div>
+        <p>Approved By: ___________________________</p>
+        <p class="text-[10px] text-slate-600">Eng. Elijah Kiamba (Chairperson)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST FEEDBACK NOTIFICATION -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 bg-marian-950 text-white border border-amber-400/40 px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50">
+    <div class="p-1 rounded bg-amber-500/20 text-amber-400">
+      <i data-lucide="check-circle" class="w-4 h-4"></i>
+    </div>
+    <span id="toastMessage" class="text-xs font-medium">Notification triggered</span>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="no-print bg-marian-950 text-slate-400 text-xs py-8 px-4 border-t border-marian-850 mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2 text-slate-300">
+        <i data-lucide="cross" class="w-4 h-4 text-amber-400"></i>
+        <span class="font-cinzel font-bold text-white">St. Matthew Small Christian Community</span>
+      </div>
+      <p class="text-center sm:text-right">
+        Catholic Student Community • "Faith expressed through accountability, love and service."
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== CORE JAVASCRIPT STATE & APPLICATION ENGINE ==================== -->
+  <script>
+    // Bump this version string whenever initialMembers or initialContributions are edited
+    const DATA_VERSION = "v2_2026_11";
+
+    // Synchronized 34-Member Register for St. Matthew SCC
+    const initialMembers = [
+      { id: 1, name: "Elijah Kiamba", phone: "0798348200", regNo: "", year: "Year 3", role: "Chairperson", hostel: "Mum Juice Room 4", isLeader: true },
+      { id: 2, name: "Mary Kyale", phone: "0769222806", regNo: "", year: "Year 4", role: "Vice Chairperson", hostel: "Demfas Room A6", isLeader: true },
+      { id: 3, name: "Mercy Gacheri", phone: "0743304065", regNo: "", year: "Year 2", role: "Treasurer", hostel: "Miracle Force 1", isLeader: true },
+      { id: 4, name: "Emmanuel Mwambu", phone: "0712441389", regNo: "", year: "Year 3", role: "Secretary", hostel: "Mum Juice Room 4", isLeader: true },
+      { id: 5, name: "Dennis Njoroge", phone: "0758506390", regNo: "IC211-0059/2024", year: "Year 3", role: "Organising Secretary", hostel: "Fortune Elites Room S1", isLeader: true },
+      { id: 6, name: "Boniface Thairu", phone: "0700587933", regNo: "", year: "Year 2", role: "Liturgist", hostel: "Fortune Elites Room B7", isLeader: true },
+      { id: 7, name: "Brenda Jepkorir", phone: "0745444940", regNo: "", year: "Year 3", role: "Member", hostel: "Taita Room 107", isLeader: false },
+      { id: 8, name: "Charity Chepleting", phone: "0710536307", regNo: "", year: "Year 2", role: "Member", hostel: "Baobab", isLeader: false },
+      { id: 9, name: "Ivyne Cherono", phone: "0110296811", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 10, name: "George Nzili", phone: "0703311741", regNo: "", year: "Year 4", role: "Member", hostel: "Mother's Union", isLeader: false },
+      { id: 11, name: "Josephine Mwende", phone: "0112888294", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 12, name: "David Lemelin", phone: "0796757211", regNo: "", year: "Year 4", role: "Member", hostel: "", isLeader: false },
+      { id: 13, name: "Samuel Kyalo", phone: "0704453230", regNo: "", year: "Year 3", role: "Member", hostel: "Amazing Grace Room 20", isLeader: false },
+      { id: 14, name: "Rodgers Kahindi", phone: "0769701734", regNo: "", year: "Year 4", role: "Member", hostel: "", isLeader: false },
+      { id: 15, name: "Fidelis Nyanguthii", phone: "0769670165", regNo: "", year: "Year 2", role: "Member", hostel: "Swizz", isLeader: false },
+      { id: 16, name: "Elizabeth Awino", phone: "0795772364", regNo: "", year: "Year 3", role: "Member", hostel: "Mekatilili Room 28", isLeader: false },
+      { id: 17, name: "Mitchel Mikal", phone: "0743303276", regNo: "", year: "Year 3", role: "Member", hostel: "Mekatilili Room 8", isLeader: false },
+      { id: 18, name: "Gilbert Kiptoo", phone: "0702047272", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 19, name: "Chelsea Atieno", phone: "0769937342", regNo: "", year: "Year 3", role: "Member", hostel: "G Block", isLeader: false },
+      { id: 20, name: "Scott Wambua", phone: "0716563600", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 21, name: "Daisy Kosgei", phone: "", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 22, name: "Victoria Ndanu", phone: "0740592864", regNo: "", year: "Year 3", role: "Member", hostel: "Faith", isLeader: false },
+      { id: 23, name: "Mary Benedetta", phone: "0703517417", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 24, name: "Felix Kithuka", phone: "0793985300", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 25, name: "Faith Mueni", phone: "", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 26, name: "Vida Patrick", phone: "0703392050", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 27, name: "Annette Nyawira", phone: "0798776606", regNo: "", year: "Year 2", role: "Member", hostel: "", isLeader: false },
+      { id: 28, name: "Augustine Kimuyu", phone: "0792003753", regNo: "", year: "Year 3", role: "Member", hostel: "Zion", isLeader: false },
+      { id: 29, name: "Elijah Kimani", phone: "0701072274", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 30, name: "Albert Odhiambo", phone: "", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 31, name: "Victor Ogwera", phone: "", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 32, name: "Joan Irungu", phone: "0110677366", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 33, name: "Monicah Ndanu", phone: "", regNo: "", year: "Year 3", role: "Member", hostel: "", isLeader: false },
+      { id: 34, name: "Byrone Ochieng", phone: "", regNo: "", year: "Year 3", role: "Member", hostel: "Block E Room 23", isLeader: false },
+    ];
+
+    // Synchronized Contributions (68 Entries: 2 per member, aligned by memberId)
+    const initialContributions = [
+      { id: 101, memberId: 1, memberName: "Elijah Kiamba", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 102, memberId: 1, memberName: "Elijah Kiamba", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 103, memberId: 2, memberName: "Mary Kyale", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 104, memberId: 2, memberName: "Mary Kyale", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 105, memberId: 3, memberName: "Mercy Gacheri", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 106, memberId: 3, memberName: "Mercy Gacheri", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 107, memberId: 4, memberName: "Emmanuel Mwambu", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 108, memberId: 4, memberName: "Emmanuel Mwambu", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 109, memberId: 5, memberName: "Dennis Njoroge", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 110, memberId: 5, memberName: "Dennis Njoroge", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 111, memberId: 6, memberName: "Boniface Thairu", category: "Semestral Dues", expected: 400, paid: 250, balance: 150, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 112, memberId: 6, memberName: "Boniface Thairu", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 113, memberId: 7, memberName: "Brenda Jepkorir", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 114, memberId: 7, memberName: "Brenda Jepkorir", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 115, memberId: 8, memberName: "Charity Chepleting", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 116, memberId: 8, memberName: "Charity Chepleting", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 117, memberId: 9, memberName: "Ivyne Cherono", category: "Semestral Dues", expected: 400, paid: 50, balance: 350, status: "Partial", receipt: "—", date: "—", remarks: "Not Cleared" },
+      { id: 118, memberId: 9, memberName: "Ivyne Cherono", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 119, memberId: 10, memberName: "George Nzili", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 120, memberId: 10, memberName: "George Nzili", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 121, memberId: 11, memberName: "Josephine Mwende", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 122, memberId: 11, memberName: "Josephine Mwende", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 123, memberId: 12, memberName: "David Lemelin", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 124, memberId: 12, memberName: "David Lemelin", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 125, memberId: 13, memberName: "Samuel Kyalo", category: "Semestral Dues", expected: 400, paid: 100, balance: 300, status: "Partial", receipt: "—", date: "—", remarks: "Not Cleared" },
+      { id: 126, memberId: 13, memberName: "Samuel Kyalo", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 127, memberId: 14, memberName: "Rodgers Kahindi", category: "Semestral Dues", expected: 400, paid: 350, balance: 50, status: "Partial", receipt: "—", date: "—", remarks: "Not Cleared" },
+      { id: 128, memberId: 14, memberName: "Rodgers Kahindi", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 129, memberId: 15, memberName: "Fidelis Nyanguthii", category: "Semestral Dues", expected: 400, paid: 270, balance: 130, status: "Partial", receipt: "—", date: "—", remarks: "Not Cleared" },
+      { id: 130, memberId: 15, memberName: "Fidelis Nyanguthii", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 131, memberId: 16, memberName: "Elizabeth Awino", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 132, memberId: 16, memberName: "Elizabeth Awino", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 133, memberId: 17, memberName: "Mitchel Mikal", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 134, memberId: 17, memberName: "Mitchel Mikal", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 135, memberId: 18, memberName: "Gilbert Kiptoo", category: "Semestral Dues", expected: 400, paid: 300, balance: 100, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 136, memberId: 18, memberName: "Gilbert Kiptoo", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 137, memberId: 19, memberName: "Chelsea Atieno", category: "Semestral Dues", expected: 400, paid: 150, balance: 250, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 138, memberId: 19, memberName: "Chelsea Atieno", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 139, memberId: 20, memberName: "Scott Wambua", category: "Semestral Dues", expected: 400, paid: 250, balance: 150, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 140, memberId: 20, memberName: "Scott Wambua", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 141, memberId: 21, memberName: "Daisy Kosgei", category: "Semestral Dues", expected: 400, paid: 150, balance: 250, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 142, memberId: 21, memberName: "Daisy Kosgei", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 143, memberId: 22, memberName: "Victoria Ndanu", category: "Semestral Dues", expected: 400, paid: 300, balance: 100, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 144, memberId: 22, memberName: "Victoria Ndanu", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 145, memberId: 23, memberName: "Mary Benedetta", category: "Semestral Dues", expected: 400, paid: 370, balance: 30, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 146, memberId: 23, memberName: "Mary Benedetta", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 147, memberId: 24, memberName: "Felix Kithuka", category: "Semestral Dues", expected: 400, paid: 400, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 148, memberId: 24, memberName: "Felix Kithuka", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 149, memberId: 25, memberName: "Faith Mueni", category: "Semestral Dues", expected: 400, paid: 100, balance: 300, status: "Partial", receipt: "—", date: "—", remarks: "Not cleared" },
+      { id: 150, memberId: 25, memberName: "Faith Mueni", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 151, memberId: 26, memberName: "Vida Patrick", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 152, memberId: 26, memberName: "Vida Patrick", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 153, memberId: 27, memberName: "Annette Nyawira", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 154, memberId: 27, memberName: "Annette Nyawira", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not cleared" },
+      { id: 155, memberId: 28, memberName: "Augustine Kimuyu", category: "Semestral Dues", expected: 400, paid: 300, balance: 100, status: "Partial", receipt: "—", date: "—", remarks: "Not Cleared" },
+      { id: 156, memberId: 28, memberName: "Augustine Kimuyu", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 157, memberId: 29, memberName: "Elijah Kimani", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 158, memberId: 29, memberName: "Elijah Kimani", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 159, memberId: 30, memberName: "Albert Odhiambo", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 160, memberId: 30, memberName: "Albert Odhiambo", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 161, memberId: 31, memberName: "Victor Ogwera", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 162, memberId: 31, memberName: "Victor Ogwera", category: "Animation Levy", expected: 100, paid: 100, balance: 0, status: "Paid", receipt: "—", date: "—", remarks: "Cleared" },
+      { id: 163, memberId: 32, memberName: "Joan Irungu", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 164, memberId: 32, memberName: "Joan Irungu", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 165, memberId: 33, memberName: "Monicah Ndanu", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 166, memberId: 33, memberName: "Monicah Ndanu", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 167, memberId: 34, memberName: "Byrone Ochieng", category: "Semestral Dues", expected: 400, paid: 0, balance: 400, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" },
+      { id: 168, memberId: 34, memberName: "Byrone Ochieng", category: "Animation Levy", expected: 100, paid: 0, balance: 100, status: "Pending", receipt: "", date: "—", remarks: "Not Cleared" }
+    ];
+
+    // Automatically replace outdated localStorage cache when DATA_VERSION changes
+    if (localStorage.getItem('scc_data_version') !== DATA_VERSION) {
+      localStorage.setItem('scc_members', JSON.stringify(initialMembers));
+      localStorage.setItem('scc_contributions', JSON.stringify(initialContributions));
+      localStorage.setItem('scc_data_version', DATA_VERSION);
+    }
+
+    // State object
+    let appState = {
+      semester: "2026/2027-1",
+      members: JSON.parse(localStorage.getItem('scc_members')) || initialMembers,
+      contributions: JSON.parse(localStorage.getItem('scc_contributions')) || initialContributions,
+      attendance: JSON.parse(localStorage.getItem('scc_attendance_records')) || {},
+      activeMainTab: 'ledger',
+      memberRoleFilter: 'all',
+      isLeaderAuthenticated: localStorage.getItem('scc_leader_unlocked') === 'true'
+    };
+
+    // Boot system
+    window.onload = function() {
+      lucide.createIcons();
+      updateLiturgicalBadge();
+      updateAuthButtonState();
+      recalculateFinancialMetrics();
+      renderLedgerTable();
+      populateMemberSelectDropdown();
+      initAttendanceDefaults();
+      renderMemberCards();
+      document.getElementById('printDateAudit').textContent = new Date().toLocaleDateString('en-US', { dateStyle: 'full' });
+    };
+
+    function updateLiturgicalBadge() {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('currentDateBadge').textContent = new Date().toLocaleDateString('en-US', options) + " • St. Matthew Community Portal";
+    }
+
+    // ==================== AUTHENTICATION MANAGEMENT ====================
+    function updateAuthButtonState() {
+      const btn = document.getElementById('leaderStatusBtn');
+      const icon = document.getElementById('lockIcon');
+      const label = document.getElementById('lockBtnLabel');
+
+      if (appState.isLeaderAuthenticated) {
+        btn.className = "px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition flex items-center space-x-1.5";
+        icon.setAttribute('data-lucide', 'unlock');
+        label.textContent = "Executive Active";
+      } else {
+        btn.className = "px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-marian-950 font-bold text-xs shadow-md shadow-amber-500/20 active:scale-95 transition flex items-center space-x-1.5";
+        icon.setAttribute('data-lucide', 'lock');
+        label.textContent = "Leader Login";
+      }
+      lucide.createIcons();
+    }
+
+    function toggleLeaderAuthModal() {
+      if (appState.isLeaderAuthenticated) {
+        appState.isLeaderAuthenticated = false;
+        localStorage.setItem('scc_leader_unlocked', 'false');
+        updateAuthButtonState();
+        showToast("Logged out of Executive Leader Mode.");
+      } else {
+        document.getElementById('authModal').classList.remove('hidden');
+        document.getElementById('authPinInput').value = '';
+        document.getElementById('authPinInput').focus();
+      }
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    function submitLeaderPin() {
+      const pin = document.getElementById('authPinInput').value;
+      if (pin === '1234') {
+        appState.isLeaderAuthenticated = true;
+        localStorage.setItem('scc_leader_unlocked', 'true');
+        updateAuthButtonState();
+        closeAuthModal();
+        showToast("Executive privileges unlocked (Passkey 1234 verified)!");
+      } else {
+        showToast("Incorrect passkey. (Default passkey: 1234)");
+      }
+    }
+
+    function requireLeaderAuth(actionName, callback) {
+      if (appState.isLeaderAuthenticated) {
+        callback();
+      } else {
+        showToast(`Authentication required to ${actionName}. Please enter passkey (1234).`);
+        document.getElementById('authModal').classList.remove('hidden');
+        document.getElementById('authPinInput').value = '';
+      }
+    }
+
+    // ==================== MAIN TAB SWITCHER ====================
+    function switchMainTab(tab) {
+      appState.activeMainTab = tab;
+      const tabs = ['ledger', 'attendance', 'directory'];
+      
+      tabs.forEach(t => {
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        const module = document.getElementById('module' + t.charAt(0).toUpperCase() + t.slice(1));
+        
+        if (t === tab) {
+          btn.className = "flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-bold bg-marian-900 text-amber-300 shadow-xs transition flex items-center justify-center gap-2";
+          module.classList.remove('hidden');
+        } else {
+          btn.className = "flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2";
+          module.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'attendance') {
+        loadAttendanceForSelectedDate();
+      } else if (tab === 'directory') {
+        renderMemberCards();
+      }
+      lucide.createIcons();
+    }
+
+    // ==================== FINANCIAL CALCULATIONS & METRICS ====================
+    function recalculateFinancialMetrics() {
+      let semestralPaid = 0;
+      let semestralTarget = appState.members.length * 400;
+
+      let animationPaid = 0;
+      let animationTarget = appState.members.length * 100;
+
+      appState.contributions.forEach(c => {
+        if (c.category === 'Semestral Dues') semestralPaid += c.paid;
+        if (c.category === 'Animation Levy') animationPaid += c.paid;
+      });
+
+      const totalCollected = semestralPaid + animationPaid;
+      const totalExpected = semestralTarget + animationTarget;
+      const overallRate = totalExpected > 0 ? Math.round((totalCollected / totalExpected) * 100) : 0;
+
+      const semRate = semestralTarget > 0 ? Math.round((semestralPaid / semestralTarget) * 100) : 0;
+      const animRate = animationTarget > 0 ? Math.round((animationPaid / animationTarget) * 100) : 0;
+
+      const contributingMemberIds = new Set(appState.contributions.filter(c => c.paid > 0).map(c => c.memberId));
+      const participationRate = appState.members.length > 0 ? Math.round((contributingMemberIds.size / appState.members.length) * 100) : 0;
+
+      let fullyPaidCount = 0;
+      appState.members.forEach(m => {
+        const dues = appState.contributions.filter(c => c.memberId === m.id);
+        const sem = dues.filter(c => c.category === 'Semestral Dues').reduce((acc, x) => acc + x.paid, 0);
+        const anim = dues.filter(c => c.category === 'Animation Levy').reduce((acc, x) => acc + x.paid, 0);
+        if (sem >= 400 && anim >= 100) fullyPaidCount++;
+      });
+
+      // Update Top Metrics UI
+      document.getElementById('statSemestralAmount').textContent = `KES ${semestralPaid.toLocaleString()}`;
+      document.getElementById('statSemestralTarget').textContent = `Target: KES ${semestralTarget.toLocaleString()}`;
+      document.getElementById('statSemestralRate').textContent = `${semRate}%`;
+
+      document.getElementById('statAnimationAmount').textContent = `KES ${animationPaid.toLocaleString()}`;
+      document.getElementById('statAnimationTarget').textContent = `Target: KES ${animationTarget.toLocaleString()}`;
+      document.getElementById('statAnimationRate').textContent = `${animRate}%`;
+
+      document.getElementById('statOverallEfficiency').textContent = `${overallRate}%`;
+      document.getElementById('statTotalCollected').textContent = `Total: KES ${totalCollected.toLocaleString()} / ${totalExpected.toLocaleString()}`;
+
+      document.getElementById('statActiveMembers').textContent = `${contributingMemberIds.size} / ${appState.members.length}`;
+      document.getElementById('statFullyPaidCount').textContent = `${fullyPaidCount} Members Fully Cleared`;
+      document.getElementById('statParticipationRate').textContent = `${participationRate}%`;
+
+      // Update Visual Progress Bars
+      document.getElementById('barSemestralText').textContent = `KES ${semestralPaid.toLocaleString()} / ${semestralTarget.toLocaleString()} (${semRate}%)`;
+      document.getElementById('barSemestralFill').style.width = `${Math.min(semRate, 100)}%`;
+
+      document.getElementById('barAnimationText').textContent = `KES ${animationPaid.toLocaleString()} / ${animationTarget.toLocaleString()} (${animRate}%)`;
+      document.getElementById('barAnimationFill').style.width = `${Math.min(animRate, 100)}%`;
+
+      // Print View Sync
+      document.getElementById('printSemestralTarget').textContent = `KES ${semestralTarget.toLocaleString()}`;
+      document.getElementById('printSemestralCollected').textContent = `KES ${semestralPaid.toLocaleString()} (${semRate}%)`;
+      document.getElementById('printAnimationTarget').textContent = `KES ${animationTarget.toLocaleString()}`;
+      document.getElementById('printAnimationCollected').textContent = `KES ${animationPaid.toLocaleString()} (${animRate}%)`;
+    }
+
+    // ==================== MODULE 1: LEDGER RENDERING & CONTROLS ====================
+    function getStatusBadge(status) {
+      const normalized = (status || '').toLowerCase();
+      if (normalized === 'paid' || normalized === 'fully paid') {
+        return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Fully Paid</span>';
+      }
+      if (normalized === 'partial' || normalized === 'partially paid') {
+        return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">Partial</span>';
+      }
+      return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">Pending</span>';
+    }
+
+    function renderLedgerTable() {
+      const tbody = document.getElementById('ledgerTableBody');
+      const printBody = document.getElementById('printLedgerBody');
+      const catFilter = document.getElementById('ledgerCategoryFilter').value;
+      const statusFilter = document.getElementById('ledgerStatusFilter').value;
+      const search = document.getElementById('ledgerSearchInput').value.toLowerCase();
+
+      tbody.innerHTML = '';
+      if (printBody) printBody.innerHTML = '';
+
+      const filtered = appState.contributions.filter(c => {
+        const matchesCat = (catFilter === 'all' || c.category === catFilter);
+        const matchesStatus = (statusFilter === 'all' || c.status === statusFilter);
+        const matchesSearch = !search || 
+          c.memberName.toLowerCase().includes(search) || 
+          (c.receipt && c.receipt.toLowerCase().includes(search)) || 
+          (c.remarks && c.remarks.toLowerCase().includes(search));
+        return matchesCat && matchesStatus && matchesSearch;
+      });
+
+      document.getElementById('ledgerCountSummary').textContent = `Showing ${filtered.length} of ${appState.contributions.length} recorded entries`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">No contribution records match the selected filters.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(c => {
+        const member = appState.members.find(m => m.id === c.memberId) || { phone: "—", regNo: "—" };
+        
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-3">
+            <span class="font-bold text-slate-900 block">${c.memberName}</span>
+            <span class="text-[11px] text-slate-400">${member.phone || 'No Phone'} • ${member.regNo || 'Reg Pending'}</span>
+          </td>
+          <td class="p-3 font-semibold text-slate-700">${c.category}</td>
+          <td class="p-3 font-mono font-bold text-slate-800">KES ${c.expected}</td>
+          <td class="p-3 font-mono font-bold text-emerald-700">KES ${c.paid}</td>
+          <td class="p-3 font-mono font-bold ${c.balance > 0 ? 'text-rose-600' : 'text-slate-400'}">KES ${c.balance}</td>
+          <td class="p-3">${getStatusBadge(c.status)}</td>
+          <td class="p-3">
+            <span class="font-mono text-slate-700 block">${c.receipt || '—'}</span>
+            <span class="text-[10px] text-slate-400">${c.date || '—'}</span>
+          </td>
+          <td class="p-3 text-right">
+            <button onclick="editContribution(${c.id})" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition">
+              Edit
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        if (printBody) {
+          const ptr = document.createElement('tr');
+          ptr.className = "border-b border-black";
+          ptr.innerHTML = `
+            <td class="p-1.5 border-r border-black font-semibold">${c.memberName}</td>
+            <td class="p-1.5 border-r border-black">${c.category}</td>
+            <td class="p-1.5 border-r border-black">KES ${c.expected}</td>
+            <td class="p-1.5 border-r border-black">KES ${c.paid}</td>
+            <td class="p-1.5 border-r border-black">KES ${c.balance}</td>
+            <td class="p-1.5 border-r border-black">${c.status}</td>
+            <td class="p-1.5 font-mono">${c.receipt || '—'}</td>
+          `;
+          printBody.appendChild(ptr);
+        }
+      });
+    }
+
+    function filterLedger() {
+      renderLedgerTable();
+    }
+
+    function populateMemberSelectDropdown() {
+      const select = document.getElementById('payMemberSelect');
+      select.innerHTML = '';
+      appState.members.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = `${m.name} (${m.role}) - ${m.phone || 'No Phone'}`;
+        select.appendChild(opt);
+      });
+    }
+
+    function autoFillExpectedAmount() {
+      const cat = document.getElementById('payContributionType').value;
+      const expectedField = document.getElementById('payExpectedAmount');
+      const paidField = document.getElementById('payPaidAmount');
+      if (cat === 'Semestral Dues') {
+        expectedField.value = 400;
+        paidField.value = 400;
+      } else if (cat === 'Animation Levy') {
+        expectedField.value = 100;
+        paidField.value = 100;
+      } else {
+        expectedField.value = 200;
+        paidField.value = 200;
+      }
+    }
+
+    let editingContributionId = null;
+
+    function openPaymentModal() {
+      requireLeaderAuth("record a financial payment", () => {
+        editingContributionId = null;
+        document.getElementById('paymentForm').reset();
+        document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+        autoFillExpectedAmount();
+        document.getElementById('paymentModal').classList.remove('hidden');
+      });
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').classList.add('hidden');
+    }
+
+    function editContribution(contribId) {
+      requireLeaderAuth("modify this payment entry", () => {
+        const item = appState.contributions.find(c => c.id === contribId);
+        if (!item) return;
+        editingContributionId = item.id;
+        document.getElementById('payMemberSelect').value = item.memberId;
+        document.getElementById('payContributionType').value = item.category;
+        document.getElementById('payExpectedAmount').value = item.expected;
+        document.getElementById('payPaidAmount').value = item.paid;
+        document.getElementById('payReceiptCode').value = (item.receipt === 'UNPAID' || item.receipt === '—') ? '' : item.receipt;
+        document.getElementById('payDate').value = (!item.date || item.date === '—') ? new Date().toISOString().split('T')[0] : item.date;
+        document.getElementById('payRemarks').value = item.remarks || '';
+        document.getElementById('paymentModal').classList.remove('hidden');
+      });
+    }
+
+    function savePaymentRecord(e) {
+      e.preventDefault();
+      const memberId = parseInt(document.getElementById('payMemberSelect').value);
+      const member = appState.members.find(m => m.id === memberId);
+      const category = document.getElementById('payContributionType').value;
+      const expected = parseFloat(document.getElementById('payExpectedAmount').value) || 0;
+      const paid = parseFloat(document.getElementById('payPaidAmount').value) || 0;
+      const receipt = (document.getElementById('payReceiptCode').value || (paid > 0 ? "CASH-REC" : "UNPAID")).toUpperCase();
+      const date = document.getElementById('payDate').value;
+      const remarks = document.getElementById('payRemarks').value || (paid >= expected ? "Cleared" : "Not Cleared");
+
+      const balance = Math.max(expected - paid, 0);
+      let status = "Pending";
+      if (paid >= expected) status = "Paid";
+      else if (paid > 0) status = "Partial";
+
+      if (editingContributionId) {
+        const index = appState.contributions.findIndex(c => c.id === editingContributionId);
+        if (index !== -1) {
+          appState.contributions[index] = {
+            ...appState.contributions[index],
+            memberId,
+            memberName: member.name,
+            category,
+            expected,
+            paid,
+            balance,
+            status,
+            receipt,
+            date,
+            remarks
+          };
+        }
+        showToast("Payment record updated successfully!");
+      } else {
+        const newRecord = {
+          id: Date.now(),
+          memberId,
+          memberName: member.name,
+          category,
+          expected,
+          paid,
+          balance,
+          status,
+          receipt,
+          date,
+          remarks
+        };
+        appState.contributions.unshift(newRecord);
+        showToast(`Payment of KES ${paid} recorded for ${member.name}!`);
+      }
+
+      localStorage.setItem('scc_contributions', JSON.stringify(appState.contributions));
+      recalculateFinancialMetrics();
+      renderLedgerTable();
+      closePaymentModal();
+    }
+
+    function exportContributionsCSV() {
+      let csv = "ID,Member Name,Category,Expected (KES),Paid (KES),Balance (KES),Status,Receipt Code,Date,Remarks\n";
+      appState.contributions.forEach(c => {
+        csv += `"${c.id}","${c.memberName}","${c.category}","${c.expected}","${c.paid}","${c.balance}","${c.status}","${c.receipt || ''}","${c.date || ''}","${c.remarks || ''}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', `St_Matthew_SCC_Ledger_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Financial Ledger exported to CSV!");
+    }
+
+    function shareTreasurerSummary() {
+      let semestralPaid = 0;
+      let animationPaid = 0;
+      appState.contributions.forEach(c => {
+        if (c.category === 'Semestral Dues') semestralPaid += c.paid;
+        if (c.category === 'Animation Levy') animationPaid += c.paid;
+      });
+
+      const message = 
+`*ST. MATTHEW SCC • TREASURY STATEMENT*
+🏛️ *Taita Taveta University Catholic Chaplaincy*
+📅 *Date:* ${new Date().toLocaleDateString('en-US', { dateStyle: 'medium' })}
+
+💰 *Semestral Dues Collected:* KES ${semestralPaid.toLocaleString()} / ${(appState.members.length * 400).toLocaleString()}
+🎶 *Sunday Animation Levies:* KES ${animationPaid.toLocaleString()} / ${(appState.members.length * 100).toLocaleString()}
+📊 *Overall Community Total:* KES ${(semestralPaid + animationPaid).toLocaleString()}
+👥 *Contributing Members:* ${new Set(appState.contributions.filter(c => c.paid > 0).map(c => c.memberId)).size} / ${appState.members.length}
+
+_All contributions go towards spiritual animations, liturgy materials, and member welfare._
+_Treasurer: Sis. Mercy Gacheri_`;
+
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    // ==================== MODULE 2: ROLL-CALL ATTENDANCE ENGINE ====================
+    function initAttendanceDefaults() {
+      document.getElementById('attendanceDatePicker').value = new Date().toISOString().split('T')[0];
+    }
+
+    function getAttendanceKey() {
+      const date = document.getElementById('attendanceDatePicker').value;
+      const type = document.getElementById('attendanceServiceType').value;
+      return `${date}_${type}`;
+    }
+
+    function loadAttendanceForSelectedDate() {
+      const key = getAttendanceKey();
+      let record = appState.attendance[key];
+
+      if (!record) {
+        record = {};
+        appState.members.forEach(m => {
+          record[m.id] = { status: 'Present', remarks: '' };
+        });
+        appState.attendance[key] = record;
+        localStorage.setItem('scc_attendance_records', JSON.stringify(appState.attendance));
+      }
+
+      renderAttendanceTable(record);
+    }
+
+    function renderAttendanceTable(record) {
+      const tbody = document.getElementById('attendanceTableBody');
+      tbody.innerHTML = '';
+
+      let present = 0, apology = 0, absent = 0;
+
+      appState.members.forEach((m, idx) => {
+        const att = record[m.id] || { status: 'Present', remarks: '' };
+        if (att.status === 'Present') present++;
+        else if (att.status === 'Apology') apology++;
+        else absent++;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-3 text-slate-400 font-mono">${idx + 1}</td>
+          <td class="p-3">
+            <span class="font-bold text-slate-900 block">${m.name}</span>
+            <span class="text-[11px] text-slate-500">${m.role}</span>
+          </td>
+          <td class="p-3 text-slate-600">
+            <span>${m.year}</span>
+            <span class="block text-[11px] text-slate-400">${m.phone || 'No Phone'}</span>
+          </td>
+          <td class="p-3 text-center">
+            <div class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-semibold">
+              <button onclick="setMemberAttendance(${m.id}, 'Present')" class="px-2.5 py-1 rounded-lg transition ${att.status === 'Present' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}">Present</button>
+              <button onclick="setMemberAttendance(${m.id}, 'Apology')" class="px-2.5 py-1 rounded-lg transition ${att.status === 'Apology' ? 'bg-amber-500 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}">Apology</button>
+              <button onclick="setMemberAttendance(${m.id}, 'Absent')" class="px-2.5 py-1 rounded-lg transition ${att.status === 'Absent' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}">Absent</button>
+            </div>
+          </td>
+          <td class="p-3">
+            <input type="text" onchange="updateAttendanceRemark(${m.id}, this.value)" value="${att.remarks || ''}" placeholder="Note..." class="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-white">
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('attTotalMembers').textContent = appState.members.length;
+      document.getElementById('attPresentCount').textContent = present;
+      document.getElementById('attApologyCount').textContent = apology;
+      document.getElementById('attAbsentCount').textContent = absent;
+
+      const rate = appState.members.length > 0 ? Math.round((present / appState.members.length) * 100) : 0;
+      document.getElementById('attRateBadge').textContent = `${rate}% (${present}/${appState.members.length})`;
+    }
+
+    function setMemberAttendance(memberId, newStatus) {
+      requireLeaderAuth("update roll-call attendance", () => {
+        const key = getAttendanceKey();
+        if (!appState.attendance[key]) appState.attendance[key] = {};
+        if (!appState.attendance[key][memberId]) appState.attendance[key][memberId] = { status: 'Present', remarks: '' };
+
+        appState.attendance[key][memberId].status = newStatus;
+        localStorage.setItem('scc_attendance_records', JSON.stringify(appState.attendance));
+        renderAttendanceTable(appState.attendance[key]);
+      });
+    }
+
+    function updateAttendanceRemark(memberId, text) {
+      requireLeaderAuth("save roll-call remarks", () => {
+        const key = getAttendanceKey();
+        if (!appState.attendance[key]) appState.attendance[key] = {};
+        if (!appState.attendance[key][memberId]) appState.attendance[key][memberId] = { status: 'Present', remarks: '' };
+        appState.attendance[key][memberId].remarks = text;
+        localStorage.setItem('scc_attendance_records', JSON.stringify(appState.attendance));
+      });
+    }
+
+    function markAllPresent() {
+      requireLeaderAuth("mark roll-call", () => {
+        const key = getAttendanceKey();
+        if (!appState.attendance[key]) appState.attendance[key] = {};
+        appState.members.forEach(m => {
+          appState.attendance[key][m.id] = { status: 'Present', remarks: '' };
+        });
+        localStorage.setItem('scc_attendance_records', JSON.stringify(appState.attendance));
+        renderAttendanceTable(appState.attendance[key]);
+        showToast("Marked all registered members as Present!");
+      });
+    }
+
+    function shareAttendanceReport() {
+      const date = document.getElementById('attendanceDatePicker').value;
+      const type = document.getElementById('attendanceServiceType').value;
+      const key = getAttendanceKey();
+      const rec = appState.attendance[key] || {};
+
+      let presentList = [];
+      let apologyList = [];
+      let absentList = [];
+
+      appState.members.forEach(m => {
+        const att = rec[m.id] || { status: 'Present' };
+        if (att.status === 'Present') presentList.push(m.name);
+        else if (att.status === 'Apology') apologyList.push(`${m.name} (${att.remarks || 'Apology'})`);
+        else absentList.push(m.name);
+      });
+
+      const message = 
+`*ST. MATTHEW SCC • SERVICE ATTENDANCE REGISTER*
+📅 *Date:* ${date}
+⛪ *Service:* ${type}
+
+✅ *Present (${presentList.length}):*
+${presentList.map(n => "• " + n).join("\n") || "None"}
+
+⚠️ *Apologies (${apologyList.length}):*
+${apologyList.map(n => "• " + n).join("\n") || "None"}
+
+❌ *Absent (${absentList.length}):*
+${absentList.map(n => "• " + n).join("\n") || "None"}
+
+_Secretary Register • St. Matthew Community_`;
+
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    // ==================== MODULE 3: MEMBER DIRECTORY & REGISTRATION ====================
+    function filterMembersByRole(role) {
+      appState.memberRoleFilter = role;
+      ['All', 'Leader', 'General'].forEach(r => {
+        const btn = document.getElementById('roleFilter' + r);
+        if (r.toLowerCase() === role) {
+          btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-marian-900 text-white";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200";
+        }
+      });
+      renderMemberCards();
+    }
+
+    function renderMemberCards() {
+      const grid = document.getElementById('memberCardsGrid');
+      const search = document.getElementById('memberSearchInput').value.toLowerCase();
+      grid.innerHTML = '';
+
+      const filtered = appState.members.filter(m => {
+        const matchesRole = appState.memberRoleFilter === 'all' || 
+          (appState.memberRoleFilter === 'leader' && m.isLeader) ||
+          (appState.memberRoleFilter === 'general' && !m.isLeader);
+        const matchesSearch = !search || 
+          m.name.toLowerCase().includes(search) || 
+          m.role.toLowerCase().includes(search) || 
+          m.year.toLowerCase().includes(search) || 
+          (m.hostel && m.hostel.toLowerCase().includes(search));
+        return matchesRole && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-xs">No members found matching search criteria.</div>`;
+        return;
+      }
+
+      filtered.forEach(m => {
+        const dues = appState.contributions.filter(c => c.memberId === m.id);
+        const semPaid = dues.filter(c => c.category === 'Semestral Dues').reduce((acc, x) => acc + x.paid, 0);
+        const animPaid = dues.filter(c => c.category === 'Animation Levy').reduce((acc, x) => acc + x.paid, 0);
+        const isFullyCleared = (semPaid >= 400 && animPaid >= 100);
+
+        const contactButtons = m.phone
+          ? `<a href="https://wa.me/254${m.phone.replace(/^0/, '')}" target="_blank" class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition" title="Message on WhatsApp">
+               <i data-lucide="message-circle" class="w-4 h-4"></i>
+             </a>
+             <a href="tel:${m.phone}" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-marian-800 transition" title="Call Member">
+               <i data-lucide="phone" class="w-4 h-4"></i>
+             </a>`
+          : `<span class="text-[10px] text-slate-400 italic">No contact</span>`;
+
+        const card = document.createElement('article');
+        card.className = "bg-white rounded-2xl p-5 border border-slate-200 hover:border-amber-300 hover:shadow-md transition flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl ${m.isLeader ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-700'} flex items-center justify-center font-bold font-cinzel text-sm">
+                  ${m.name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div>
+                  <h3 class="font-bold text-sm text-slate-900">${m.name}</h3>
+                  <span class="text-[11px] font-semibold ${m.isLeader ? 'text-amber-700' : 'text-slate-500'}">${m.role}</span>
+                </div>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isFullyCleared ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
+                ${isFullyCleared ? 'Dues Cleared' : 'Dues Pending'}
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <p class="flex items-center gap-1.5">
+                <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span>${m.year} • ${m.regNo || 'Reg Pending'}</span>
+              </p>
+              <p class="flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i>
+                <span>${m.hostel || 'Hostel Not Specified'}</span>
+              </p>
+              <p class="flex items-center gap-1.5">
+                <i data-lucide="wallet" class="w-3.5 h-3.5 text-amber-600"></i>
+                <span>Paid: KES ${semPaid + animPaid} / 500</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[11px] font-mono text-slate-500">${m.phone || '—'}</span>
+            <div class="flex items-center space-x-2">
+              ${contactButtons}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function openMemberModal() {
+      requireLeaderAuth("register a new member", () => {
+        document.getElementById('memberForm').reset();
+        document.getElementById('memberModal').classList.remove('hidden');
+      });
+    }
+
+    function closeMemberModal() {
+      document.getElementById('memberModal').classList.add('hidden');
+    }
+
+    function saveNewMember(e) {
+      e.preventDefault();
+      const name = document.getElementById('newMemberName').value;
+      const phone = document.getElementById('newMemberPhone').value;
+      const regNo = document.getElementById('newMemberReg').value;
+      const year = document.getElementById('newMemberYear').value;
+      const role = document.getElementById('newMemberRole').value;
+      const hostel = document.getElementById('newMemberHostel').value;
+      const isLeader = role !== "Member";
+
+      const newId = appState.members.length + 1;
+      const member = {
+        id: newId,
+        name,
+        phone,
+        regNo,
+        year,
+        role,
+        hostel,
+        isLeader
+      };
+
+      appState.members.push(member);
+      localStorage.setItem('scc_members', JSON.stringify(appState.members));
+
+      // Auto-create pending Semestral Dues & Animation Levy records for the new member
+      const baseId = Date.now();
+      appState.contributions.push(
+        {
+          id: baseId,
+          memberId: newId,
+          memberName: name,
+          category: "Semestral Dues",
+          expected: 400,
+          paid: 0,
+          balance: 400,
+          status: "Pending",
+          receipt: "UNPAID",
+          date: "—",
+          remarks: "New registration"
+        },
+        {
+          id: baseId + 1,
+          memberId: newId,
+          memberName: name,
+          category: "Animation Levy",
+          expected: 100,
+          paid: 0,
+          balance: 100,
+          status: "Pending",
+          receipt: "UNPAID",
+          date: "—",
+          remarks: "New registration"
+        }
+      );
+      localStorage.setItem('scc_contributions', JSON.stringify(appState.contributions));
+
+      populateMemberSelectDropdown();
+      recalculateFinancialMetrics();
+      renderLedgerTable();
+      renderMemberCards();
+      closeMemberModal();
+      showToast(`Member ${name} registered successfully!`);
+    }
+
+    function switchSemester(val) {
+      appState.semester = val;
+      document.getElementById('printSemesterAudit').textContent = val;
+      showToast(`Loaded records for ${val}`);
+    }
+
+    // ==================== UTILITY FEEDBACK ====================
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const msgElem = document.getElementById('toastMessage');
+      msgElem.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1740 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>St. Matthew SCC | Calendar, Venues & Reminder Hub</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="{% static 'js/tailwind.js' %}"></script>
+  <script src="{% static 'js/lucide.min.js' %}"></script>
+
+  <!-- Google Fonts: Inter & Cinzel for Liturgical Dignity -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  
+  
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            marian: {
+              950: '#0A1220',
+              900: '#0F1E36',
+              850: '#142746',
+              800: '#1E3A8A',
+              700: '#2563EB',
+              100: '#DBEAFE',
+              50: '#EFF6FF',
+            },
+            liturgical: {
+              gold: '#D97706',
+              amber: '#F59E0B',
+              warm: '#FEF3C7',
+              accent: '#B45309'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            cinzel: ['Cinzel', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        color: black;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    .glass-nav {
+      background: rgba(15, 30, 54, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #94a3b8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen selection:bg-amber-100 selection:text-amber-900 flex flex-col">
+
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-marian-950 focus:shadow-lg">Skip to main content</a>
+
+  <!-- TOP LITURGICAL STATUS BAR -->
+  <aside aria-label="Liturgical Banner" class="no-print bg-marian-950 text-slate-300 text-xs py-2 px-4 border-b border-marian-850">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="currentDateBadge" class="font-medium text-slate-200">Catholic Liturgical Calendar</span>
+      </div>
+      <div class="flex items-center space-x-3 text-[11px] sm:text-xs">
+        <span class="text-amber-400 flex items-center gap-1 font-semibold">
+          <i data-lucide="cross" class="w-3.5 h-3.5"></i> St. Matthew SCC Jumuiya
+        </span>
+        <span class="text-slate-500 hidden sm:inline">•</span>
+        <span class="text-slate-300"> Calendar & Reminder Hub</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- NAVIGATION BAR -->
+  <header class="no-print glass-nav sticky top-0 z-40 border-b border-white/10 shadow-lg text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <a href="{% url 'index' %}" class="flex items-center space-x-3 group">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-md shadow-amber-500/20 border border-amber-300/40 text-marian-950 font-cinzel font-black text-xl group-hover:scale-105 transition">
+          M
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-cinzel font-bold text-base sm:text-lg tracking-wide text-white group-hover:text-amber-300 transition">St. Matthew SCC</span>
+            
+          </div>
+          <p class="text-[11px] text-slate-300 font-light">Calendar, Venues & Liturgical Reminders</p>
+        </div>
+      </a>
+
+      <!-- Quick Links -->
+      <nav aria-label="Calendar sections" class="hidden md:flex items-center space-x-1 text-xs font-semibold">
+        <a href="#countdowns" class="px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">Countdowns</a>
+        <a href="#calendar-section" class="px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">Events Calendar</a>
+        <a href="#venue-rotation" class="px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">Venue Rotation</a>
+        <a href="#reminders" class="px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">WhatsApp & SMS</a>
+      </nav>
+
+      <!-- Leader Auth & Print Actions -->
+      <div class="flex items-center space-x-2">
+        <button onclick="openLeaderModal()" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-marian-950 font-bold text-xs shadow-md shadow-amber-500/20 active:scale-95 transition flex items-center space-x-1.5">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Leader Portal</span>
+          <span class="sm:hidden">Leader</span>
+        </button>
+
+        <button onclick="window.print()" title="Print Notice Board Schedule" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs transition border border-white/10">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <nav aria-label="Main pages" class="no-print border-b border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2">
+      <ul class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+        <li><a href="{% url 'index' %}" class="inline-flex rounded-lg px-3 py-2 text-marian-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">Home &amp; Liturgy</a></li>
+        <li><a href="{% url 'calendar' %}" aria-current="page" class="inline-flex rounded-lg bg-marian-900 px-3 py-2 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">Calendar &amp; Venues <span class="sr-only">(current page)</span></a></li>
+        <li><a href="{% url 'treasury' %}" class="inline-flex rounded-lg px-3 py-2 text-marian-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">Treasury &amp; Register</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO & 4 CORE COUNTDOWN CLOCKS ==================== -->
+  <section id="countdowns" class="no-print bg-gradient-to-b from-marian-900 via-marian-850 to-marian-800 text-white pt-8 pb-14 px-4">
+    <div class="max-w-7xl mx-auto space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-semibold mb-3">
+            <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+            Live Automated Alerts & Milestones
+          </span>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-cinzel tracking-tight text-white">
+            Community Calendar & Venues
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+            Access meeting hosts, Thursday Eucharistic Adoration locations, Mass animation rehearsals on Saturday, and dues deadlines in one centralized portal.
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="exportAllToICS()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition flex items-center space-x-1.5 shadow-xs">
+            <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Export to Phone (.ics)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Top Live Countdown Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Wednesday Countdown -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-amber-300">Wednesday SCC</span>
+              <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <h2 class="text-sm font-semibold text-white truncate" id="cdWedHost">Room Host: Bro Dennis</h2>
+            <p class="text-[11px] text-slate-300" id="cdWedTime">Wednesdays • 7:30 PM</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400">Starts in:</span>
+            <span id="timerWed" class="text-xs font-mono font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">Calculating...</span>
+          </div>
+        </article>
+
+        <!-- Thursday Countdown -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-liturgical-amber">Thursday Adoration</span>
+              <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <h2 class="text-sm font-semibold text-white truncate" id="cdThuVenue">Taita Taveta University Main Chapel Sanctuary(AB2-003)</h2>
+            <p class="text-[11px] text-slate-300" id="cdThuTime">Thursdays • 7:30 PM</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400">Holy Hour in:</span>
+            <span id="timerThu" class="text-xs font-mono font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">Calculating...</span>
+          </div>
+        </article>
+
+        <!-- Sunday Animation Countdown -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-emerald-300">Sunday Mass Duty</span>
+              <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <h2 class="text-sm font-semibold text-white">Small Christian Community on duty</h2>
+            <p class="text-[11px] text-slate-300">St. Augustine Chaplaincy Catholic Church • 10:30 AM</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400">Mass in:</span>
+            <span id="timerAnim" class="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">Calculating...</span>
+          </div>
+        </article>
+
+        <!-- Semestral Due Date Countdown -->
+        <article class="bg-white/10 rounded-2xl p-4 border border-white/15 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-300 text-xs mb-1">
+              <span class="font-bold uppercase tracking-wider text-rose-300">Semestral contribution</span>
+              <i data-lucide="wallet" class="w-4 h-4 text-rose-400"></i>
+            </div>
+            <h2 class="text-sm font-semibold text-white">Semestral & Animation Target</h2>
+            <p class="text-[11px] text-slate-300">KES 400 Sem + 100 Anim</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400">Deadline:</span>
+            <span id="timerDues" class="text-xs font-mono font-bold bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded border border-rose-500/30">Calculating...</span>
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN INTERACTIVE WORKSPACE -->
+  <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 -mt-6 space-y-12 pb-24 w-full flex-1">
+
+    <!-- ==================== SECTION 1: VENUE ROTATION & HOST ALLOCATION ==================== -->
+    <section id="venue-rotation" class="space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="p-1 rounded bg-amber-100 text-amber-900">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </span>
+            <h2 class="text-xl font-bold font-cinzel text-marian-900 tracking-wide">
+              Weekly Venue & Host Rotation
+            </h2>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500">
+            Wednesday SCC host room allocations and Thursday Eucharistic Adoration locations.
+          </p>
+        </div>
+
+        <button onclick="openLeaderModal('venue')" class="self-start sm:self-auto px-3.5 py-2 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-sm transition flex items-center space-x-1.5 active:scale-95">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          <span>Update Current Week Venues</span>
+        </button>
+      </div>
+
+      <!-- Rotation Visual Cards (Past, Active Current, Upcoming) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- Previous Host (Completed) -->
+        <article class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs opacity-85 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Previous Week</span>
+              <span class="text-xs text-slate-400">Completed</span>
+            </div>
+            <h3 class="font-bold text-sm text-slate-900">Host: Mary Kyale</h3>
+            <p class="text-xs text-slate-600 mt-1 flex items-center gap-1.5">
+              <i data-lucide="building" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span>Demfas Hostels, Room A6</span>
+            </p>
+            <div class="mt-3 p-3 bg-slate-50 rounded-xl text-xs text-slate-600 space-y-1">
+              <p><strong>Reflection:</strong> St. Matthew 5: The Feast of the christ the king.</p>
+              <p><strong>Attendance:</strong> 13 members present</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>Animator: Bro. Dennis Njoroge</span>
+            <span class="text-emerald-600 font-semibold">✓ Archived</span>
+          </div>
+        </article>
+
+        <!-- Current Active Host (Featured) -->
+        <article class="bg-gradient-to-b from-white to-amber-50/40 rounded-3xl p-6 border-2 border-amber-400 shadow-md flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-amber-500 text-marian-950 font-bold text-[10px] uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-xs">
+            Active Host This Week
+          </div>
+
+          <div>
+            <div class="flex items-center space-x-2 text-amber-700 text-xs font-bold mb-2">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>Wednesday Service (7:30 PM – 9:30 PM)</span>
+            </div>
+
+            <h3 class="text-base font-bold text-marian-900" id="activeHostName">Host: Bro. Dennis Gitau</h3>
+            
+            <div class="mt-2 space-y-1.5 text-xs text-slate-700">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="map-pin" class="w-4 h-4 text-rose-500 shrink-0"></i>
+                <span class="font-semibold text-slate-900" id="activeHostVenue">Block A, Room 14</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <i data-lucide="user-check" class="w-4 h-4 text-marian-700 shrink-0"></i>
+                <span>Animator: <strong id="activeAnimator">Sis. Clara Mutua</strong></span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <i data-lucide="music" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                <span>Opening Hymn: <em id="activeHymn">Amazing Grace / Bwana Ni Mchungaji</em></span>
+              </div>
+            </div>
+
+            <div class="mt-4 p-3 bg-white/90 rounded-2xl border border-amber-200/80 text-xs text-slate-600">
+              <span class="font-bold text-marian-900 block mb-0.5">Liturgical Theme:</span>
+              <span id="activeFocus">Faithful Stewardship & Generosity in Student Life. Please bring your Christian Community bibles.</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-amber-200/80 flex items-center justify-between">
+            <button onclick="shareActiveWednesday()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share Wednesday Notice
+            </button>
+            <button onclick="addToGoogleCal('wed')" class="text-xs font-bold text-marian-700 hover:text-marian-900 flex items-center gap-1">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Add to Calendar
+            </button>
+          </div>
+        </article>
+
+        <!-- Upcoming Host (Next Week) -->
+        <article class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-marian-800">Next In Line</span>
+              <span class="text-xs text-slate-500">Upcoming</span>
+            </div>
+            <h3 class="font-bold text-sm text-slate-900" id="nextHostName">Host: Bro. John Otieno</h3>
+            <p class="text-xs text-slate-600 mt-1 flex items-center gap-1.5">
+              <i data-lucide="building" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span id="nextHostVenue">Hostel 4, Block C, Room 22</span>
+            </p>
+            <div class="mt-3 p-3 bg-slate-50 rounded-xl text-xs text-slate-600 space-y-1">
+              <p><strong>Prepared Theme:</strong> Walking in Christ's Light</p>
+              <p><strong>Animator:</strong> Sis. Faith Achieng</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Confirmed with Host</span>
+            <button onclick="notifyHostNextWeek()" class="text-xs font-semibold text-marian-700 hover:underline">Send Alert</button>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Thursday Eucharistic Adoration Specific Venue Strip -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-liturgical-gold border border-amber-200 flex items-center justify-center shrink-0">
+            <i data-lucide="sun" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm sm:text-base text-slate-900">Thursday Eucharistic Adoration Venue</h3>
+              <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Weekly Routine</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-0.5">
+              Location: <strong class="text-marian-900" id="adorationVenueName">Taita Taveta University Chapel (Main Sanctuary- AB2-003)</strong> • 7:00 PM – 9:00 PM
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 self-stretch sm:self-auto">
+          <button onclick="shareThursdayReminder()" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 text-xs font-bold transition flex items-center justify-center gap-1.5">
+            <i data-lucide="share" class="w-3.5 h-3.5"></i>
+            <span>WhatsApp Adoration Notice</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== SECTION 2: DYNAMIC CALENDAR & SCHEDULE ==================== -->
+    <section id="calendar-section" class="space-y-6">
+      
+      <!-- Calendar Header & View Switcher -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="p-1 rounded bg-marian-100 text-marian-900">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+              </span>
+              <h2 class="text-xl font-bold font-cinzel text-marian-900">
+                Semester Liturgical & Event Calendar
+              </h2>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Filter by Jumuiya services, adoration holy hours, and financial targets.
+            </p>
+          </div>
+
+          <!-- Controls: Month Nav & View Mode -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+              <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg hover:bg-white text-slate-700 transition" title="Previous Month">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <span id="calendarCurrentMonthLabel" class="px-3 text-xs font-bold text-slate-800 min-w-32 text-center">October 2026</span>
+              <button onclick="changeMonth(1)" class="p-1.5 rounded-lg hover:bg-white text-slate-700 transition" title="Next Month">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- View Modes: Month / Week / Agenda -->
+            <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200 text-xs font-semibold">
+              <button id="viewBtnMonth" onclick="setCalendarView('month')" class="px-3 py-1.5 rounded-lg bg-white text-marian-950 shadow-xs transition">Month</button>
+              <button id="viewBtnWeek" onclick="setCalendarView('week')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">Week</button>
+              <button id="viewBtnAgenda" onclick="setCalendarView('agenda')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">Agenda</button>
+            </div>
+
+            <button onclick="openLeaderModal('event')" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-marian-950 font-bold text-xs shadow-xs transition flex items-center space-x-1">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>Add Event</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Filters & Search Toolbar -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          
+          <!-- Category Filter Pills -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 custom-scrollbar text-xs">
+            <button onclick="filterEvents('all')" id="filter-all" class="px-3 py-1.5 rounded-xl font-bold bg-marian-900 text-white transition shrink-0">All</button>
+            <button onclick="filterEvents('scc_service')" id="filter-scc_service" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition shrink-0 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span> Wed SCC
+            </button>
+            <button onclick="filterEvents('adoration')" id="filter-adoration" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition shrink-0 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span> Thu Adoration
+            </button>
+            <button onclick="filterEvents('animation')" id="filter-animation" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition shrink-0 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Animation
+            </button>
+            <button onclick="filterEvents('deadline')" id="filter-deadline" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition shrink-0 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span> Deadlines
+            </button>
+          </div>
+
+          <!-- Keyword Search -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input type="text" id="eventSearchInput" oninput="searchEvents()" placeholder="Search venue, animator, hymn..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-marian-600">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW CONTAINER: MONTH VIEW -->
+      <div id="calendarMonthContainer" class="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xs overflow-x-auto">
+        <div class="min-w-[650px]">
+          <!-- Weekday Labels -->
+          <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+          </div>
+          <!-- Days Matrix Generated by JS -->
+          <div id="calendarDaysGrid" class="grid grid-cols-7 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- VIEW CONTAINER: WEEKLY TIMELINE VIEW (Hidden by default) -->
+      <div id="calendarWeekContainer" class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+          <h3 class="font-bold text-sm text-marian-900 font-cinzel">Current Liturgical Week Schedule</h3>
+          <span class="text-xs text-slate-500" id="weekRangeLabel">Showing 7-day breakdown</span>
+        </div>
+        <div id="calendarWeekList" class="space-y-3">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+
+      <!-- VIEW CONTAINER: AGENDA / LIST VIEW (Hidden by default) -->
+      <div id="calendarAgendaContainer" class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hidden space-y-3">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="font-bold text-sm text-marian-900 font-cinzel">Upcoming Events Agenda</h3>
+          <span class="text-xs text-slate-500">Chronological order</span>
+        </div>
+        <div id="calendarAgendaList" class="space-y-3">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== SECTION 3: MULTI-CHANNEL LITURGICAL REMINDER GENERATOR ==================== -->
+    <section id="reminders" class="space-y-6">
+      
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="p-1 rounded bg-emerald-100 text-emerald-900">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </span>
+          <h2 class="text-xl font-bold font-cinzel text-marian-900 tracking-wide">
+            Multi-Channel Liturgical Reminder Generator
+          </h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500">
+          Generate formatted WhatsApp broadcast announcements and SMS alerts for group admins with 1-click sharing.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Left: Template Type Selector & WhatsApp Broadcast Generator -->
+        <article class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+          <div class="space-y-4">
+            
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                <i data-lucide="message-square" class="w-4 h-4"></i> WhatsApp Broadcast Studio
+              </span>
+              <span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">1-Click Dispatch</span>
+            </div>
+
+            <!-- Reminder Type Pills -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <button onclick="setReminderTemplate('wed')" id="btnRemWed" class="p-2.5 rounded-xl border text-center font-bold transition bg-marian-900 text-white border-marian-900 shadow-xs">
+                Wed Service
+              </button>
+              <button onclick="setReminderTemplate('thu')" id="btnRemThu" class="p-2.5 rounded-xl border text-center font-semibold transition bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+                Thu Adoration
+              </button>
+              <button onclick="setReminderTemplate('fri')" id="btnRemFri" class="p-2.5 rounded-xl border text-center font-semibold transition bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+                Sunday Mass
+              </button>
+              <button onclick="setReminderTemplate('dues')" id="btnRemDues" class="p-2.5 rounded-xl border text-center font-semibold transition bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+                Dues Deadline
+              </button>
+            </div>
+
+            <!-- WhatsApp Message Preview Box -->
+            <div class="relative">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Liturgical Message Preview (Ready for WhatsApp Group):
+              </label>
+              <textarea id="whatsappPreviewArea" rows="7" class="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-800 leading-relaxed focus:ring-2 focus:ring-marian-600 focus:outline-hidden custom-scrollbar"></textarea>
+            </div>
+
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-slate-100">
+            <button onclick="sendWhatsAppPreview()" class="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 active:scale-95 transition flex items-center justify-center space-x-2">
+              <i data-lucide="share" class="w-4 h-4"></i>
+              <span>Send Broadcast to WhatsApp</span>
+            </button>
+            <button onclick="copyToClipboard(document.getElementById('whatsappPreviewArea').value, 'WhatsApp text')" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span>Copy</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- Right: Africa's Talking SMS API Simulator -->
+        <article class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+          <div class="space-y-4">
+            
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-marian-800 flex items-center gap-1.5">
+                <i data-lucide="smartphone" class="w-4 h-4"></i> Africa's Talking SMS Dispatcher
+              </span>
+              <span class="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full font-bold">API Mock</span>
+            </div>
+
+            <p class="text-xs text-slate-500">
+              For members who are offline or don't have active WhatsApp data. Concisely formatted for telco SMS gateways.
+            </p>
+
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-600 mb-1">
+                <label class="font-semibold">SMS Text Payload</label>
+                <span id="smsCharCounter" class="font-mono text-slate-500">0 / 160 chars (1 SMS)</span>
+              </div>
+              <textarea id="smsPreviewArea" oninput="updateSmsCharCount()" rows="4" class="w-full p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-mono leading-relaxed focus:ring-2 focus:ring-marian-600 focus:outline-hidden"></textarea>
+            </div>
+
+            <!-- API Payload JSON Simulation -->
+            <div class="p-3 bg-marian-950 rounded-2xl text-[11px] font-mono text-slate-300 space-y-1">
+              <div class="text-amber-400 font-bold flex items-center justify-between">
+                <span>POST https://api.africastalking.com/version1/messaging</span>
+                <span class="text-[10px] text-emerald-400">READY</span>
+              </div>
+              <p class="text-slate-400 truncate">Recipient: St. Matthew Broadcast Group (+254...)</p>
+              <p class="text-slate-400">SenderId: <span class="text-amber-300">ST_MATTHEW</span></p>
+            </div>
+
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-slate-100">
+            <button onclick="simulateSendSms()" class="flex-1 py-3 px-4 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-md active:scale-95 transition flex items-center justify-center space-x-2">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Simulate Bulk SMS Dispatch</span>
+            </button>
+            <button onclick="copyToClipboard(document.getElementById('smsPreviewArea').value, 'SMS text')" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span>Copy</span>
+            </button>
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== PRINT AREA FOR NOTICE BOARDS ==================== -->
+  <div id="printArea" class="hidden p-8 max-w-4xl mx-auto">
+    <div class="text-center border-b-2 border-black pb-4 mb-6">
+      <h1 class="text-2xl font-bold font-cinzel uppercase tracking-wider">St. Matthew Small Christian Community</h1>
+      <h2 class="text-lg font-semibold">Semester Liturgical & Event Schedule</h2>
+      <p class="text-sm italic">Taita Taveta University Catholic Chaplaincy • St. Augustine Chaplaincy</p>
+      <p class="text-xs text-slate-600 mt-1">Generated: <span id="printDateGenerated"></span></p>
+    </div>
+
+    <div class="mb-6">
+      <h3 class="font-bold text-base border-b border-black mb-2 uppercase">Weekly Routine Venues</h3>
+      <p class="text-sm"><strong>Wednesdays:</strong> SCC Service (7:30 PM – 9:30 PM) — Rotating Host Rooms</p>
+      <p class="text-sm"><strong>Thursdays:</strong> Eucharistic Adoration & Benediction (7:30 PM – 9:00 PM) — Taita Taveta Universiy Main Chapel Sanctuary(AB2-003)</p>
+    </div>
+
+    <div>
+      <h3 class="font-bold text-base border-b border-black mb-3 uppercase">Chronological Calendar</h3>
+      <table class="w-full text-left text-xs border border-collapse border-black">
+        <thead>
+          <tr class="bg-gray-200 border-b border-black">
+            <th class="p-2 border-r border-black">Date & Time</th>
+            <th class="p-2 border-r border-black">Event Title</th>
+            <th class="p-2 border-r border-black">Venue / Host</th>
+            <th class="p-2">Animator / Details</th>
+          </tr>
+        </thead>
+        <tbody id="printTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8 pt-4 border-t border-black text-center text-xs">
+      <p>Contacts: Eng. Elijah Kimba (Chair) | Miss. Mercy Gacheri (Treasurer - semestral: KES 400 / Anim: KES 100)</p>
+      <p class="mt-1 italic">"For where two or three are gathered in my name, there am I among them." — Matthew 18:20</p>
+    </div>
+  </div>
+
+  <!-- ==================== EVENT DETAILS MODAL (PUBLIC VIEW) ==================== -->
+  <div id="eventDetailsModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+        <div>
+          <span id="modalEventBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+            Event Badge
+          </span>
+          <h3 id="modalEventTitle" class="text-lg font-bold font-cinzel text-marian-900 mt-1">Event Title</h3>
+          <p id="modalEventDateTime" class="text-xs text-slate-500 font-medium">Wednesday, Oct 28 • 7:30 PM</p>
+        </div>
+        <button onclick="closeEventModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs text-slate-700">
+        <div class="flex items-start space-x-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+          <i data-lucide="map-pin" class="w-4 h-4 text-rose-500 shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-slate-900 block">Venue & Host</span>
+            <span id="modalEventVenue">Block A Room 14</span>
+          </div>
+        </div>
+
+        <div class="flex items-start space-x-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+          <i data-lucide="user" class="w-4 h-4 text-marian-700 shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-slate-900 block">Animator / Coordinator</span>
+            <span id="modalEventAnimator">Eng.Elijah Kiamba</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-amber-50/50 rounded-2xl border border-amber-100 space-y-1">
+          <span class="font-bold text-amber-900 block flex items-center gap-1.5">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Liturgical Theme & Readings:
+          </span>
+          <p id="modalEventLiturgical" class="text-slate-700 leading-relaxed">Daily Gospel & Intercessory Rosary for students.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+          <span class="font-bold text-slate-900 block flex items-center gap-1.5">
+            <i data-lucide="music" class="w-3.5 h-3.5 text-amber-600"></i> Hymns / Order of Service:
+          </span>
+          <p id="modalEventHymns" class="text-slate-600">Opening: Bwana Ni Mchungaji • Recessional: Ave Maria</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 pt-2 border-t border-slate-100">
+        <button id="modalGoogleCalBtn" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1.5">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span>Add to Google Cal</span>
+        </button>
+        <button id="modalSingleIcsBtn" class="py-2.5 px-3 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs transition flex items-center justify-center gap-1.5">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Download .ics</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== LEADER PORTAL MODAL (PASSKEY PROTECTED) ==================== -->
+  <div id="leaderModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="p-1 rounded bg-amber-100 text-amber-900">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </span>
+            <h3 class="text-lg font-bold font-cinzel text-marian-900">Leader Management Portal</h3>
+          </div>
+          <p class="text-xs text-slate-500">Authorized executive committee changes</p>
+        </div>
+        <button onclick="closeLeaderModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Passkey Login Step (if not logged in) -->
+      <div id="leaderAuthStep" class="space-y-4 py-2">
+        <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1">
+          <p class="font-bold flex items-center gap-1">
+            <i data-lucide="key" class="w-3.5 h-3.5"></i> Leader Passkey Simulation
+          </p>
+          <p>Enter the St. Matthew executive passkey (Default: <strong class="underline">1234</strong>) to unlock live editing of venues, hosts, hymns, and events.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Enter 4-Digit Passkey</label>
+          <input type="password" id="leaderPinInput" maxlength="4" placeholder="••••" class="w-full text-center text-xl tracking-widest font-mono p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-marian-600 focus:outline-hidden">
+        </div>
+
+        <button onclick="verifyLeaderPin()" class="w-full py-3 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-md transition">
+          Verify & Unlock
+        </button>
+      </div>
+
+      <!-- Leader Edit Form (Hidden until verified) -->
+      <div id="leaderEditPanel" class="space-y-4 hidden">
+        
+        <!-- Toggle: Update Venues OR Add New Event -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-bold">
+          <button id="leaderSubTabVenue" onclick="switchLeaderTab('venue')" class="flex-1 py-2 rounded-lg bg-white text-marian-950 shadow-xs transition">
+            Update Host & Venues
+          </button>
+          <button id="leaderSubTabEvent" onclick="switchLeaderTab('event')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">
+            Add Calendar Event
+          </button>
+        </div>
+
+        <!-- FORM A: UPDATE ROTATING VENUE & HOST -->
+        <form id="formUpdateVenue" onsubmit="saveLeaderVenues(event)" class="space-y-3.5 text-xs">
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <span class="font-bold text-marian-900 block text-xs uppercase tracking-wide">Wednesday Host Allocation</span>
+            
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Host Member Name</label>
+              <input type="text" id="editHostName" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Venue / Room / Block</label>
+              <input type="text" id="editHostVenue" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-600 font-semibold mb-1">Animator</label>
+                <input type="text" id="editAnimator" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+              </div>
+              <div>
+                <label class="block text-slate-600 font-semibold mb-1">Opening Hymn</label>
+                <input type="text" id="editHymn" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Liturgical Focus / Scripture</label>
+              <input type="text" id="editFocus" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2.5">
+            <span class="font-bold text-amber-900 block text-xs uppercase tracking-wide">Thursday Adoration Venue</span>
+            
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Sanctuary / Chapel</label>
+              <input type="text" id="editAdorationVenue" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-marian-900 hover:bg-marian-850 text-amber-300 font-bold text-xs shadow-md transition">
+            Save Changes to LocalStorage & Banners
+          </button>
+        </form>
+
+        <!-- FORM B: ADD NEW EVENT -->
+        <form id="formAddEvent" onsubmit="saveLeaderNewEvent(event)" class="space-y-3.5 text-xs hidden">
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Event Title</label>
+            <input type="text" id="addEventTitle" required placeholder="e.g., Saturday Choir Practice" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Date</label>
+              <input type="date" id="addEventDate" required class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Category</label>
+              <select id="addEventType" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+                <option value="scc_service">Wednesday SCC</option>
+                <option value="adoration">Thursday Adoration</option>
+                <option value="animation">Mass Animation</option>
+                <option value="deadline">Fee Deadline</option>
+                <option value="meeting">Executive Meeting</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Time Span</label>
+              <input type="text" id="addEventTime" required placeholder="5:00 PM - 6:30 PM" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Venue</label>
+              <input type="text" id="addEventVenue" required placeholder="Main Chapel" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Animator / Host / Coordinator</label>
+            <input type="text" id="addEventAnimator" placeholder="e.g., Sis. Faith Achieng" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white">
+          </div>
+
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Liturgical Notes or Hymns</label>
+            <textarea id="addEventNotes" rows="2" placeholder="Readings and instructions..." class="w-full p-2.5 rounded-xl border border-slate-300 bg-white"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition">
+            Add to Live Calendar
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST FEEDBACK NOTIFICATION -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 bg-marian-950 text-white border border-amber-400/40 px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50">
+    <div class="p-1 rounded bg-amber-500/20 text-amber-400">
+      <i data-lucide="check-circle" class="w-4 h-4"></i>
+    </div>
+    <span id="toastMessage" class="text-xs font-medium">Notification triggered</span>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="no-print bg-marian-950 text-slate-400 text-xs py-8 px-4 border-t border-marian-850 mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2 text-slate-300">
+        <i data-lucide="cross" class="w-4 h-4 text-amber-400"></i>
+        <span class="font-cinzel font-bold text-white">St. Matthew Small Christian Community</span>
+      </div>
+      <p class="text-center sm:text-right">
+        Catholic Student Community • "Called to Proclaim the Gospel through Fellowship and Action."
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== CORE JAVASCRIPT APPLICATION LOGIC ==================== -->
+ <!-- ==================== CORE JAVASCRIPT APPLICATION LOGIC ==================== -->
+  <script>
+    function renderIcons() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // Initial Dataset and State
+    const defaultData = {
+      activeHost: {
+        name: "Bro. Dennis Gitau",
+        venue: "Block A, Room 14",
+        animator: "Mercy Gacheri",
+        hymn: "Bwana Ni Mchungaji / Amazing Grace",
+        focus: "Faithful Stewardship & Generosity in Student Life. Please bring your Christian Community bibles."
+      },
+      nextHost: {
+        name: "Bro. John Otieno",
+        venue: "Hostel 4, Block C, Room 22"
+      },
+      adoration: {
+        venue: "Taita Taveta University Chapel (Main Sanctuary- AB2-003)"
+      },
+      events: [
+        {
+          id: 1,
+          title: "Wednesday SCC Service & Fellowship",
+          type: "scc_service",
+          date: "2026-11-25",
+          time: "7:30 PM - 9:30 PM",
+          venue: "Block A, Room 14",
+          animator: "Boniface Thairu",
+          liturgical: "Meditation on Gospel of Luke & Intercessory Rosary for end-semester exams.",
+          hymns: "Opening: Bwana Ni Mchungaji • Recessional: Ave Maria"
+        },
+        {
+          id: 2,
+          title: "Thursday Eucharistic Adoration",
+          type: "adoration",
+          date: "2026-11-26",
+          time: "7:30 PM - 9:00 PM",
+          venue: "Taita Taveta Main Chapel Sanctuary(AB2-003)",
+          animator: "Small Christian community on duty (Liturgy Lead)",
+          liturgical: "Quiet contemplation, Divine Mercy Chaplet, and Eucharistic Benediction.",
+          hymns: "Tantum Ergo • O Sacrament Most Holy"
+        },
+        {
+          id: 3,
+          title: "General cleaning and Animation Rehearsal",
+          type: "animation",
+          date: "2026-11-28",
+          time: "5:00 PM - 6:59 PM",
+          venue: "St. Augustine Chaplaincy Catholic Church",
+          animator: "Small Christian Community on duty",
+          liturgical: "Prayers of the faithful and offertory presentation alignment for Sunday Mass animation.",
+          hymns: "Gloria in Excelsis Deo • Sanctus (Kiswahili & Latin)"
+        },
+        {
+          id: 4,
+          title: "Sunday Main Mass Animation",
+          type: "animation",
+          date: "2026-11-22",
+          time: "10:30 AM - 12:30 PM",
+          venue: "St. Augustine Catholic Chaplaincy",
+          animator: "Small Christian Community on duty",
+          liturgical: "Solemnity of Christ the King. Full liturgical animation by St. Matthew Jumuiya.",
+          hymns: "Processional, Offertory & Thanksgiving Anthems"
+        },
+        {
+          id: 5,
+          title: "Wednesday SCC Service & Rosary",
+          type: "scc_service",
+          date: "2026-12-02",
+          time: "7:30 PM - 9:30 PM",
+          venue: "Hostel 4, Block C, Room 22",
+          animator: "Sis. Faith Achieng",
+          liturgical: "Theme: Walking in Christ's Light. Rosary Glorious Mysteries.",
+          hymns: "Bwana Yesu Alisema • Ni Furaha Yangu"
+        },
+        {
+          id: 6,
+          title: "Thursday Eucharistic Adoration",
+          type: "adoration",
+          date: "2026-12-03",
+          time: "7:30 PM - 9:00 PM",
+          venue: "Taita Taveta University Main Chapel Sanctuary(AB2-003)",
+          animator: "Fr. Chaplain & Liturgy Committee",
+          liturgical: "Silent adoration and Sacrament of Reconciliation (Confession).",
+          hymns: "Down in Adoration Falling"
+        },
+        {
+          id: 7,
+          title: "Semestral Contribution Clearance Deadline",
+          type: "deadline",
+          date: "2026-12-11",
+          time: "11:59 PM Deadline",
+          venue: "M-PESA to Treasurer Mercy Gacheri",
+          animator: "Sis. Mercy Gacheri (Treasurer)",
+          liturgical: "Treasury reconciliation for semestral dues (KES 400) and animation fund (KES 100).",
+          hymns: "Financial Stewardship"
+        },
+        {
+          id: 8,
+          title: "SCC Executive Council Meeting",
+          type: "meeting",
+          date: "2026-12-05",
+          time: "2:00 PM - 3:30 PM",
+          venue: "Chaplaincy Committee Room",
+          animator: "Bro. Elijah Kiamba (Chair)",
+          liturgical: "Review of weekly fellowships, treasury accounts, and December charity outreach visit.",
+          hymns: "Veni Sancte Spiritus"
+        }
+      ]
+    };
+
+    // Load from LocalStorage or initialize
+    let appState = {
+      activeHost: JSON.parse(localStorage.getItem('scc_active_host')) || defaultData.activeHost,
+      nextHost: defaultData.nextHost,
+      adoration: JSON.parse(localStorage.getItem('scc_adoration')) || defaultData.adoration,
+      events: JSON.parse(localStorage.getItem('scc_events')) || defaultData.events,
+      calendarDate: new Date(),
+      currentView: 'month',
+      activeFilter: 'all',
+      searchQuery: '',
+      isLeaderUnlocked: false
+    };
+
+    // Boot App
+    document.addEventListener('DOMContentLoaded', function() {
+      initCountdowns();
+      setInterval(tickCountdowns, 1000);
+      renderIcons();
+      updateLiturgicalHeader();
+      renderVenueCards();
+      renderCalendar();
+      setReminderTemplate('wed');
+      const printDateEl = document.getElementById('printDateGenerated');
+      if (printDateEl) {
+        printDateEl.textContent = new Date().toLocaleDateString('en-US', { dateStyle: 'full' });
+      }
+    });
+
+    function updateLiturgicalHeader() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('currentDateBadge').textContent = now.toLocaleDateString('en-US', options) + " • Catholic Campus Ministry";
+    }
+
+    // ==================== VENUE CARDS RENDERING ====================
+    function renderVenueCards() {
+      document.getElementById('activeHostName').textContent = `Host: ${appState.activeHost.name}`;
+      document.getElementById('activeHostVenue').textContent = appState.activeHost.venue;
+      document.getElementById('activeAnimator').textContent = appState.activeHost.animator;
+      document.getElementById('activeHymn').textContent = appState.activeHost.hymn;
+      document.getElementById('activeFocus').textContent = appState.activeHost.focus;
+
+      document.getElementById('cdWedHost').textContent = `Host: ${appState.activeHost.name}`;
+      document.getElementById('adorationVenueName').textContent = appState.adoration.venue;
+      document.getElementById('cdThuVenue').textContent = appState.adoration.venue;
+    }
+
+    // ==================== CALENDAR RENDERING ====================
+    function renderCalendar() {
+      const year = appState.calendarDate.getFullYear();
+      const month = appState.calendarDate.getMonth();
+
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById('calendarCurrentMonthLabel').textContent = `${monthNames[month]} ${year}`;
+
+      if (appState.currentView === 'month') {
+        renderMonthGrid(year, month);
+      } else if (appState.currentView === 'week') {
+        renderWeekTimeline();
+      } else if (appState.currentView === 'agenda') {
+        renderAgendaList();
+      }
+
+      renderPrintTable();
+      renderIcons();
+    }
+
+    function setCalendarView(view) {
+      appState.currentView = view;
+      ['Month', 'Week', 'Agenda'].forEach(v => {
+        const btn = document.getElementById('viewBtn' + v);
+        const container = document.getElementById('calendar' + v + 'Container');
+        if (v.toLowerCase() === view) {
+          btn.className = "px-3 py-1.5 rounded-lg bg-white text-marian-950 shadow-xs transition font-bold";
+          container.classList.remove('hidden');
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
+          container.classList.add('hidden');
+        }
+      });
+      renderCalendar();
+    }
+
+    function changeMonth(direction) {
+      appState.calendarDate.setMonth(appState.calendarDate.getMonth() + direction);
+      renderCalendar();
+    }
+
+    function getBadgeClass(type) {
+      switch(type) {
+        case 'scc_service': return 'bg-blue-100 text-blue-800 border-blue-200';
+        case 'adoration': return 'bg-amber-100 text-amber-900 border-amber-200';
+        case 'animation': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        case 'deadline': return 'bg-rose-100 text-rose-800 border-rose-200';
+        default: return 'bg-purple-100 text-purple-800 border-purple-200';
+      }
+    }
+
+    function getCategoryTitle(type) {
+      switch(type) {
+        case 'scc_service': return 'Wed SCC';
+        case 'adoration': return 'Thu Adoration';
+        case 'animation': return 'Mass Animation';
+        case 'deadline': return 'Fee Deadline';
+        default: return 'Meeting';
+      }
+    }
+
+    function getFilteredEvents() {
+      return appState.events.filter(e => {
+        const matchesFilter = appState.activeFilter === 'all' || e.type === appState.activeFilter;
+        const q = appState.searchQuery.toLowerCase();
+        const matchesSearch = !q || 
+          e.title.toLowerCase().includes(q) || 
+          e.venue.toLowerCase().includes(q) || 
+          (e.animator && e.animator.toLowerCase().includes(q)) || 
+          (e.hymns && e.hymns.toLowerCase().includes(q));
+        return matchesFilter && matchesSearch;
+      });
+    }
+
+    function filterEvents(type) {
+      appState.activeFilter = type;
+      ['all', 'scc_service', 'adoration', 'animation', 'deadline'].forEach(cat => {
+        const btn = document.getElementById('filter-' + cat);
+        if (btn) {
+          if (cat === type) {
+            btn.className = "px-3 py-1.5 rounded-xl font-bold bg-marian-900 text-white transition shrink-0";
+          } else {
+            btn.className = "px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition shrink-0 flex items-center gap-1";
+          }
+        }
+      });
+      renderCalendar();
+    }
+
+    function searchEvents() {
+      appState.searchQuery = document.getElementById('eventSearchInput').value;
+      renderCalendar();
+    }
+
+    function renderMonthGrid(year, month) {
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const prevMonthDays = new Date(year, month, 0).getDate();
+
+      const eventsList = getFilteredEvents();
+
+      for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const dayNumber = prevMonthDays - i;
+        const cell = document.createElement('div');
+        cell.className = "min-h-[96px] p-1.5 rounded-2xl bg-slate-50/60 border border-slate-100 text-slate-300 text-[11px] font-semibold";
+        cell.innerHTML = `<span>${dayNumber}</span>`;
+        grid.appendChild(cell);
+      }
+
+      const today = new Date();
+      for (let day = 1; day <= totalDays; day++) {
+        const cell = document.createElement('div');
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === day);
+
+        cell.className = `min-h-[105px] p-2 rounded-2xl border transition flex flex-col justify-between ${isToday ? 'bg-amber-50/70 border-amber-400 ring-2 ring-amber-300/40' : 'bg-white border-slate-200/80 hover:border-slate-300'}`;
+        
+        const dayEvents = eventsList.filter(e => e.date === dateStr);
+
+        let eventsHtml = dayEvents.map(e => `
+          <button onclick="openEventDetails(${e.id})" class="text-left w-full truncate text-[10px] font-bold px-1.5 py-0.5 rounded-lg border mb-1 transition hover:scale-[1.02] ${getBadgeClass(e.type)}">
+            ${e.time.split(' - ')[0] || ''} ${e.title}
+          </button>
+        `).join('');
+
+        cell.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold ${isToday ? 'text-amber-800 bg-amber-200 px-1.5 py-0.2 rounded-full' : 'text-slate-700'}">${day}</span>
+              ${dayEvents.length > 0 ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>` : ''}
+            </div>
+            <div class="space-y-0.5 overflow-hidden">
+              ${eventsHtml}
+            </div>
+          </div>
+        `;
+        grid.appendChild(cell);
+      }
+
+      const totalCells = firstDayIndex + totalDays;
+      const nextDays = (totalCells % 7 === 0) ? 0 : 7 - (totalCells % 7);
+      for (let i = 1; i <= nextDays; i++) {
+        const cell = document.createElement('div');
+        cell.className = "min-h-[96px] p-1.5 rounded-2xl bg-slate-50/60 border border-slate-100 text-slate-300 text-[11px] font-semibold";
+        cell.innerHTML = `<span>${i}</span>`;
+        grid.appendChild(cell);
+      }
+    }
+
+    function renderWeekTimeline() {
+      const container = document.getElementById('calendarWeekList');
+      container.innerHTML = '';
+      const events = getFilteredEvents();
+
+      if (events.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No events found matching criteria for this week.</p>`;
+        return;
+      }
+
+      events.forEach(e => {
+        const item = document.createElement('div');
+        item.className = "p-4 rounded-2xl border border-slate-200/90 bg-white hover:bg-slate-50/80 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs";
+        item.innerHTML = `
+          <div class="flex items-start space-x-3.5">
+            <div class="p-2.5 rounded-xl border shrink-0 text-center min-w-16 ${getBadgeClass(e.type)}">
+              <span class="block text-xs font-bold uppercase">${new Date(e.date).toLocaleDateString('en-US', { weekday: 'short' })}</span>
+              <span class="block text-base font-black">${e.date.split('-')[2]}</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${getBadgeClass(e.type)}">${getCategoryTitle(e.type)}</span>
+                <span class="text-xs text-slate-500 font-medium">${e.time}</span>
+              </div>
+              <h4 class="text-sm font-bold text-slate-900 mt-0.5">${e.title}</h4>
+              <p class="text-xs text-slate-600 flex items-center gap-1 mt-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i> ${e.venue}
+                ${e.animator ? `<span class="text-slate-400">• Animator: ${e.animator}</span>` : ''}
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 self-end sm:self-center">
+            <button onclick="openEventDetails(${e.id})" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Details</button>
+            <button onclick="downloadSingleICS(${e.id})" class="p-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs border border-amber-200" title="Export .ics">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderAgendaList() {
+      const container = document.getElementById('calendarAgendaList');
+      container.innerHTML = '';
+      const events = [...getFilteredEvents()].sort((a,b) => new Date(a.date) - new Date(b.date));
+
+      if (events.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No agenda events found.</p>`;
+        return;
+      }
+
+      events.forEach(e => {
+        const item = document.createElement('div');
+        item.className = "p-4 rounded-2xl border border-slate-200/90 bg-white hover:shadow-xs transition flex flex-col md:flex-row md:items-center justify-between gap-3";
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${getBadgeClass(e.type)}">${getCategoryTitle(e.type)}</span>
+              <span class="text-xs font-bold text-marian-900">${new Date(e.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              <span class="text-xs text-slate-500">• ${e.time}</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900">${e.title}</h4>
+            <p class="text-xs text-slate-600 mt-1">📍 <strong>${e.venue}</strong> — ${e.liturgical}</p>
+          </div>
+          <button onclick="openEventDetails(${e.id})" class="self-start md:self-center px-3.5 py-1.5 rounded-xl bg-marian-900 text-amber-300 text-xs font-bold hover:bg-marian-850 transition">
+            View Sheet
+          </button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderPrintTable() {
+      const tbody = document.getElementById('printTableBody');
+      tbody.innerHTML = appState.events.map(e => `
+        <tr class="border-b border-black">
+          <td class="p-2 border-r border-black font-semibold">${e.date} (${e.time})</td>
+          <td class="p-2 border-r border-black font-bold">${e.title}</td>
+          <td class="p-2 border-r border-black">${e.venue}</td>
+          <td class="p-2">${e.animator || ''} — ${e.liturgical || ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ==================== EVENT DETAILS MODAL ====================
+    let currentSelectedEvent = null;
+    function openEventDetails(eventId) {
+      const e = appState.events.find(x => x.id === eventId);
+      if (!e) return;
+      currentSelectedEvent = e;
+
+      document.getElementById('modalEventBadge').textContent = getCategoryTitle(e.type);
+      document.getElementById('modalEventBadge').className = `text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${getBadgeClass(e.type)}`;
+      document.getElementById('modalEventTitle').textContent = e.title;
+      document.getElementById('modalEventDateTime').textContent = `${new Date(e.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} • ${e.time}`;
+      document.getElementById('modalEventVenue').textContent = e.venue;
+      document.getElementById('modalEventAnimator').textContent = e.animator || 'To be designated by executive council';
+      document.getElementById('modalEventLiturgical').textContent = e.liturgical || 'Standard Catholic Liturgical readings of the day.';
+      document.getElementById('modalEventHymns').textContent = e.hymns || 'Opening & Offertory Hymns selected by Choir Coordinator.';
+
+      document.getElementById('modalGoogleCalBtn').onclick = () => addToGoogleCal(e);
+      document.getElementById('modalSingleIcsBtn').onclick = () => downloadSingleICS(e.id);
+
+      document.getElementById('eventDetailsModal').classList.remove('hidden');
+      renderIcons();
+    }
+
+    function closeEventModal() {
+      document.getElementById('eventDetailsModal').classList.add('hidden');
+    }
+
+    // ==================== REMINDERS & BROADCAST GENERATOR ====================
+    function setReminderTemplate(type) {
+      // FIXED: Matches HTML button IDs btnRemWed, btnRemThu, btnRemFri, btnRemDues
+      ['Wed', 'Thu', 'Fri', 'Dues'].forEach(t => {
+        const btn = document.getElementById('btnRem' + t);
+        if (!btn) return;
+        if (t.toLowerCase() === type) {
+          btn.className = "p-2.5 rounded-xl border text-center font-bold transition bg-marian-900 text-white border-marian-900 shadow-xs";
+        } else {
+          btn.className = "p-2.5 rounded-xl border text-center font-semibold transition bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+        }
+      });
+
+      let waText = "";
+      let smsText = "";
+
+      if (type === 'wed') {
+        waText = 
+`*ST. MATTHEW SMALL CHRISTIAN COMMUNITY (SCC)*
+🔔 *WEDNESDAY SERVICE & FELLOWSHIP ALERT*
+
+Brothers and sisters in Christ, you are warmly invited to our weekly Jumuiya gathering:
+📅 *Date:* Wednesday
+⏰ *Time:* 7:30 PM – 9:30 PM
+📍 *Venue & Host Room:* ${appState.activeHost.venue} (Host: ${appState.activeHost.name})
+📖 *Animator:* ${appState.activeHost.animator}
+🎵 *Opening Hymn:* ${appState.activeHost.hymn}
+✝️ *Liturgical Focus:* ${appState.activeHost.focus}
+
+Please carry your Bible, Rosary, and a welcoming heart. All are welcome!
+_"Where two or three gather in my name, there am I."_`;
+
+        smsText = `St. Matthew SCC Wed Service: 7:30PM at ${appState.activeHost.venue} (Host: ${appState.activeHost.name}). Animator: ${appState.activeHost.animator}. Please attend!`;
+      } else if (type === 'thu') {
+        waText = 
+`*ST. MATTHEW SCC • HOLY HOUR REMINDER*
+🕊️ *EUCHARISTIC ADORATION & BENEDICTION*
+
+_"Could you not keep watch with me for one hour?" (Mt 26:40)_
+
+Join the community this Thursday for a solemn hour before Jesus in the Blessed Sacrament:
+⏰ *Time:* 7:30 PM – 9:00 PM
+📍 *Sanctuary:* ${appState.adoration.venue}
+📿 *Devotions:* Divine Mercy Chaplet, silent meditation & personal petitions.
+✝️ *Sacrament:* Sacrament of Reconciliation / Confession available.
+
+Come receive spiritual renewal and peace.`;
+
+        smsText = `St. Matthew SCC Holy Hour Adoration: Thursday 7:30PM at ${appState.adoration.venue}. Come spend an hour with the Lord in quiet prayer!`;
+      } else if (type === 'fri') {
+        waText = 
+`*ST. MATTHEW SCC • SUNDAY MASS ANIMATION ALERT*
+🎶 *CHOIR & LITURGICAL SERVICE DUTY*
+
+Dear members, St. Matthew SCC will be animating the upcoming University Sunday Mass. Kindly note the following schedule:
+📅 *General Cleaning & Rehearsal:* Saturday 5:00 PM at St. Augustine Chaplaincy
+⛪ *Sunday Mass Animation:* 10:30 AM St. Augustine Chaplaincy Catholic Church
+👔 *Dress Code:* Decent liturgical attire / Jumuiya uniform.
+
+Please ensure full punctuality for both practice and Mass animation!`;
+
+        smsText = `Small Christian Community on duty: Sat 5:00PM general cleaning at St. Augustine Chaplaincy. Sunday Mass Animation 10:30AM. Punctuality is required!`;
+      } else if (type === 'dues') {
+        waText = 
+`*ST. MATTHEW SCC • TREASURY NOTICE*
+💰 *SEMESTRAL CONTRIBUTION & ANIMATION FEES*
+
+Dear member, kindly ensure you clear your semester contributions:
+💳 *Semestral Welfare Dues:* KES 400
+🎶 *Sunday Mass Animation Fee:* KES 100
+📊 *Total Expected:* KES 500
+📱 *Treasurer Contact (M-PESA):* Miss. Mercy Gacheri (07XX-XXX-XXX)
+
+Your timely contributions enable us to support welfare and organize mass animations smoothly. God bless you!`;
+
+        smsText = `St. Matthew SCC Notice: Kindly remit your KES 400 semestral + KES 100 animation fee to Treasurer Mercy Gacheri before Dec 11. God bless you!`;
+      }
+
+      document.getElementById('whatsappPreviewArea').value = waText;
+      document.getElementById('smsPreviewArea').value = smsText;
+      updateSmsCharCount();
+    }
+
+    function updateSmsCharCount() {
+      const len = document.getElementById('smsPreviewArea').value.length;
+      const count = Math.ceil(len / 160) || 1;
+      document.getElementById('smsCharCounter').textContent = `${len} / 160 chars (${count} SMS)`;
+    }
+
+    function sendWhatsAppPreview() {
+      const text = encodeURIComponent(document.getElementById('whatsappPreviewArea').value);
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function shareActiveWednesday() {
+      setReminderTemplate('wed');
+      sendWhatsAppPreview();
+    }
+
+    function shareThursdayReminder() {
+      setReminderTemplate('thu');
+      sendWhatsAppPreview();
+    }
+
+    function notifyHostNextWeek() {
+      const text = encodeURIComponent(
+        `*St. Matthew SCC Notice*\nHello Bro. John, you are scheduled as the upcoming host for next Wednesday's SCC fellowship at ${appState.nextHost.venue}. Kindly confirm your preparation with Chairperson Dennis Gitau.`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function simulateSendSms() {
+      showToast("Africa's Talking API: Bulk SMS dispatched to 42 active community members!");
+    }
+
+    // ==================== LIVE RUNNING COUNTDOWNS ====================
+    function getNextWeeklyTarget(targetDayOfWeek, hour, minute, durationMinutes = 120) {
+      const now = new Date();
+      const target = new Date(now);
+      target.setHours(hour, minute, 0, 0);
+
+      const daysUntil = (targetDayOfWeek - now.getDay() + 7) % 7;
+      target.setDate(now.getDate() + daysUntil);
+
+      const eventEnd = new Date(target.getTime() + durationMinutes * 60 * 1000);
+      if (now > eventEnd) {
+        target.setDate(target.getDate() + 7);
+      }
+      return target;
+    }
+
+    // Semestral dues deadline (already passed)
+    let targetDues = new Date(2026, 10, 6, 23, 59, 59);
+
+    function initCountdowns() {
+      tickCountdowns();
+    }
+
+    function tickCountdowns() {
+      const now = new Date();
+
+      const targetWednesday = getNextWeeklyTarget(3, 19, 30, 120); // Wednesdays 7:30 PM
+      const targetThursday  = getNextWeeklyTarget(4, 19, 30, 90);  // Thursdays 7:30 PM
+      const targetAnimation = getNextWeeklyTarget(0, 10, 30, 120); // Sundays 10:30 AM
+
+      formatTimer(targetWednesday - now, 'timerWed', 'Wednesday fellowship ongoing!');
+      formatTimer(targetThursday - now, 'timerThu', 'Adoration ongoing!');
+      formatTimer(targetAnimation - now, 'timerAnim', 'Mass celebration today!');
+      formatTimer(targetDues - now, 'timerDues', 'Deadline passed!');
+    }
+
+    function formatTimer(diff, elementId, fallback) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      if (diff <= 0) {
+        el.textContent = fallback;
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / 1000 / 60) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+
+      const pad = (n) => String(n).padStart(2, '0');
+
+      if (days > 0) {
+        el.textContent = `${days}d ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+      } else {
+        el.textContent = `${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+      }
+    }
+
+    // ==================== LEADER PORTAL CONTROLS ====================
+    function openLeaderModal(tab = 'venue') {
+      document.getElementById('leaderModal').classList.remove('hidden');
+      if (appState.isLeaderUnlocked) {
+        document.getElementById('leaderAuthStep').classList.add('hidden');
+        document.getElementById('leaderEditPanel').classList.remove('hidden');
+        populateLeaderForm();
+        switchLeaderTab(tab);
+      } else {
+        document.getElementById('leaderAuthStep').classList.remove('hidden');
+        document.getElementById('leaderEditPanel').classList.add('hidden');
+        document.getElementById('leaderPinInput').value = '';
+      }
+      renderIcons();
+    }
+
+    function closeLeaderModal() {
+      document.getElementById('leaderModal').classList.add('hidden');
+    }
+
+    function verifyLeaderPin() {
+      const pin = document.getElementById('leaderPinInput').value;
+      if (pin === '1234') {
+        appState.isLeaderUnlocked = true;
+        document.getElementById('leaderAuthStep').classList.add('hidden');
+        document.getElementById('leaderEditPanel').classList.remove('hidden');
+        populateLeaderForm();
+        showToast("Leader verified! Unlocked executive editing controls.");
+      } else {
+        showToast("Incorrect passkey! (Hint: use 1234)");
+      }
+    }
+
+    function switchLeaderTab(tab) {
+      const venueBtn = document.getElementById('leaderSubTabVenue');
+      const eventBtn = document.getElementById('leaderSubTabEvent');
+      const formVenue = document.getElementById('formUpdateVenue');
+      const formEvent = document.getElementById('formAddEvent');
+
+      if (tab === 'venue') {
+        venueBtn.className = "flex-1 py-2 rounded-lg bg-white text-marian-950 shadow-xs transition font-bold";
+        eventBtn.className = "flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition";
+        formVenue.classList.remove('hidden');
+        formEvent.classList.add('hidden');
+      } else {
+        eventBtn.className = "flex-1 py-2 rounded-lg bg-white text-marian-950 shadow-xs transition font-bold";
+        venueBtn.className = "flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition";
+        formEvent.classList.remove('hidden');
+        formVenue.classList.add('hidden');
+      }
+    }
+
+    function populateLeaderForm() {
+      document.getElementById('editHostName').value = appState.activeHost.name;
+      document.getElementById('editHostVenue').value = appState.activeHost.venue;
+      document.getElementById('editAnimator').value = appState.activeHost.animator;
+      document.getElementById('editHymn').value = appState.activeHost.hymn;
+      document.getElementById('editFocus').value = appState.activeHost.focus;
+      document.getElementById('editAdorationVenue').value = appState.adoration.venue;
+    }
+
+    function saveLeaderVenues(e) {
+      e.preventDefault();
+      appState.activeHost = {
+        name: document.getElementById('editHostName').value,
+        venue: document.getElementById('editHostVenue').value,
+        animator: document.getElementById('editAnimator').value,
+        hymn: document.getElementById('editHymn').value,
+        focus: document.getElementById('editFocus').value
+      };
+      appState.adoration = {
+        venue: document.getElementById('editAdorationVenue').value
+      };
+
+      localStorage.setItem('scc_active_host', JSON.stringify(appState.activeHost));
+      localStorage.setItem('scc_adoration', JSON.stringify(appState.adoration));
+
+      renderVenueCards();
+      setReminderTemplate('wed');
+      closeLeaderModal();
+      showToast("Venues and hosts saved to localStorage and updated across banners!");
+    }
+
+    function saveLeaderNewEvent(e) {
+      e.preventDefault();
+      const newEvent = {
+        id: Date.now(),
+        title: document.getElementById('addEventTitle').value,
+        date: document.getElementById('addEventDate').value,
+        type: document.getElementById('addEventType').value,
+        time: document.getElementById('addEventTime').value,
+        venue: document.getElementById('addEventVenue').value,
+        animator: document.getElementById('addEventAnimator').value || 'To be designated',
+        liturgical: document.getElementById('addEventNotes').value || 'Standard liturgical reflection.',
+        hymns: 'Opening and reflective hymns'
+      };
+
+      appState.events.push(newEvent);
+      localStorage.setItem('scc_events', JSON.stringify(appState.events));
+      renderCalendar();
+      closeLeaderModal();
+      showToast("New event added to semester calendar!");
+    }
+
+    // ==================== CALENDAR SYNC & EXPORT UTILITIES ====================
+    function addToGoogleCal(eventOrType) {
+      let title, desc, loc, start, end;
+
+      if (eventOrType === 'wed') {
+        const nextWed = getNextWeeklyTarget(3, 19, 30, 120);
+        const yyyy = nextWed.getFullYear();
+        const mm = String(nextWed.getMonth() + 1).padStart(2, '0');
+        const dd = String(nextWed.getDate()).padStart(2, '0');
+        title = encodeURIComponent("St. Matthew SCC Wednesday Service");
+        desc = encodeURIComponent(`Host: ${appState.activeHost.name}\nAnimator: ${appState.activeHost.animator}\nHymns: ${appState.activeHost.hymn}\n${appState.activeHost.focus}`);
+        loc = encodeURIComponent(appState.activeHost.venue);
+        start = `${yyyy}${mm}${dd}T163000Z`;
+        end = `${yyyy}${mm}${dd}T183000Z`;
+      } else {
+        const e = eventOrType;
+        title = encodeURIComponent(e.title);
+        desc = encodeURIComponent(`${e.liturgical || ''}\nAnimator: ${e.animator || ''}`);
+        loc = encodeURIComponent(e.venue);
+        const d = e.date.replace(/-/g, '');
+        start = `${d}T163000Z`;
+        end = `${d}T183000Z`;
+      }
+
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${desc}&location=${loc}&dates=${start}/${end}`;
+      window.open(url, '_blank');
+    }
+
+    function downloadSingleICS(eventId) {
+      const e = appState.events.find(x => x.id === eventId);
+      if (!e) return;
+      const cleanDate = e.date.replace(/-/g, '');
+      const icsContent = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//St Matthew SCC//Liturgy Hub//EN
+BEGIN:VEVENT
+UID:${e.id}-scc@stmatthew.org
+DTSTAMP:20261121T000000Z
+DTSTART:${cleanDate}T163000Z
+DTEND:${cleanDate}T183000Z
+SUMMARY:${e.title}
+DESCRIPTION:${e.liturgical || ''} (Animator: ${e.animator || ''})
+LOCATION:${e.venue}
+END:VEVENT
+END:VCALENDAR`;
+
+      triggerFileDownload(icsContent, `${e.title.replace(/\s+/g, '_')}.ics`);
+      showToast("Exported single event to .ics file!");
+    }
+
+    function exportAllToICS() {
+      let vevents = appState.events.map(e => {
+        const cleanDate = e.date.replace(/-/g, '');
+        return `BEGIN:VEVENT
+UID:${e.id}-scc@stmatthew.org
+DTSTAMP:20261121T000000Z
+DTSTART:${cleanDate}T163000Z
+DTEND:${cleanDate}T183000Z
+SUMMARY:${e.title}
+DESCRIPTION:${e.liturgical || ''}
+LOCATION:${e.venue}
+END:VEVENT`;
+      }).join('\n');
+
+      const fullICS = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//St Matthew SCC//Full Semester Calendar//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:St. Matthew SCC Calendar
+${vevents}
+END:VCALENDAR`;
+
+      triggerFileDownload(fullICS, 'St_Matthew_SCC_Semester_Calendar.ics');
+      showToast("Full semester calendar exported! You can open this in Google Calendar, Apple Calendar or Outlook.");
+    }
+
+    function triggerFileDownload(content, filename) {
+      const blob = new Blob([content], { type: 'text/calendar;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function copyToClipboard(text, label = "Content") {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast(`${label} copied to clipboard!`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const msgElem = document.getElementById('toastMessage');
+      msgElem.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

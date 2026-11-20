@@ -1,0 +1,1309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>St. Matthew Small Christian Community | Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="{% static 'js/tailwind.js' %}"></script>
+  <script src="{% static 'js/lucide.min.js' %}"></script>
+  
+  <!-- Google Fonts: Inter & Cinzel for Liturgical Styling -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  
+  
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            marian: {
+              950: '#061324',
+              900: '#0B203E',
+              850: '#0E294E',
+              800: '#153B6E',
+              700: '#1D4E91',
+              600: '#2563EB',
+              100: '#DBEAFE',
+              50: '#EFF6FF',
+            },
+            liturgical: {
+              gold: '#D97706',
+              amber: '#F59E0B',
+              warm: '#FEF3C7',
+              accent: '#B45309'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            cinzel: ['Cinzel', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .glass-header {
+      background: rgba(11, 32, 62, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .tab-active {
+      border-bottom: 3px solid #F59E0B;
+      color: #0B203E;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen selection:bg-amber-100 selection:text-amber-900">
+
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-marian-950 focus:shadow-lg">Skip to main content</a>
+
+  <!-- TOP LITURGICAL STATUS BAR -->
+  <aside aria-label="Liturgical Status" class="bg-marian-950 text-slate-300 text-xs py-2 px-4 border-b border-marian-850">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="liturgicalDate" class="font-medium text-slate-200">Loading Catholic liturgical calendar...</span>
+      </div>
+      <div class="flex items-center space-x-3 text-[11px] sm:text-xs">
+        <span class="text-amber-400 flex items-center gap-1 font-medium">
+          <i data-lucide="cross" class="w-3.5 h-3.5"></i> Ordinary Time (Year A)
+        </span>
+        <span class="hidden md:inline text-slate-500">•</span>
+        <span class="text-slate-300">St. Matthew SCC • "Called to Proclaim"</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN NAVIGATION BAR -->
+  <header class="glass-header sticky top-0 z-40 border-b border-white/10 shadow-lg text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Badge (Single-Line, Never Wraps) -->
+      <a href="{% url 'index' %}" class="flex items-center space-x-3 shrink-0 group">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-md shadow-amber-500/20 border border-amber-300/40 text-marian-950 font-cinzel font-bold text-xl group-hover:scale-105 transition shrink-0">
+          M
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-cinzel font-bold text-base sm:text-lg tracking-wide text-white whitespace-nowrap group-hover:text-amber-300 transition">St. Matthew SCC</span>
+            <span class="hidden sm:inline-block bg-amber-500/20 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30 whitespace-nowrap">Jumuiya Hub</span>
+          </div>
+          <p class="text-[11px] text-slate-300 hidden md:block font-light whitespace-nowrap">Catholic Student Community &amp; Fellowship</p>
+        </div>
+      </a>
+
+      <!-- Right Side: In-Page Section Links + User Profile & Logout -->
+      <div class="flex items-center space-x-3 sm:space-x-5">
+        <nav class="hidden xl:flex items-center space-x-1 text-xs font-medium text-slate-300">
+          <a href="#dashboard" class="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-white/10 transition whitespace-nowrap">Dashboard</a>
+          <a href="#venues" class="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-white/10 transition whitespace-nowrap">Venues</a>
+          <a href="#spiritual" class="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-white/10 transition whitespace-nowrap">Liturgy &amp; Rosary</a>
+          <a href="#community" class="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-white/10 transition whitespace-nowrap">Leadership</a>
+        </nav>
+
+        {% if user.is_authenticated %}
+          <div class="flex items-center space-x-2.5 pl-2 border-l border-white/15">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-xs font-medium text-amber-200 whitespace-nowrap">
+              <i data-lucide="user-check" class="w-3.5 h-3.5 text-amber-400"></i>
+              {{ user.first_name|default:user.username }}
+            </span>
+
+            <a href="{% url 'logout' %}" class="px-3.5 py-1.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white font-semibold text-xs shadow-sm active:scale-95 transition flex items-center space-x-1.5 whitespace-nowrap">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              <span>Logout</span>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </header>
+
+  <nav aria-label="Main pages" class="no-print border-b border-slate-200 bg-white shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Left: Page Navigation -->
+      <ul class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold">
+        <li>
+          <a href="{% url 'index' %}" aria-current="page" class="inline-flex rounded-xl bg-marian-900 px-3.5 py-2 text-white whitespace-nowrap">
+            Home &amp; Liturgy
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'calendar' %}" class="inline-flex rounded-xl px-3.5 py-2 text-marian-900 hover:bg-slate-100 transition whitespace-nowrap">
+            Calendar &amp; Venues
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'treasury' %}" class="inline-flex rounded-xl px-3.5 py-2 text-marian-900 hover:bg-slate-100 transition whitespace-nowrap">
+            Treasury &amp; Register
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right: Leader & Alert Actions (Moved out of congested top bar) -->
+      <div class="flex items-center gap-2">
+        <button onclick="openVenueModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-marian-950 font-bold text-xs shadow-xs active:scale-95 transition flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          <span>Update Venues</span>
+        </button>
+
+        <button onclick="shareWeeklyBroadcast()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs active:scale-95 transition flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+          <span>WhatsApp Alert</span>
+        </button>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <section id="dashboard" class="relative bg-gradient-to-b from-marian-900 via-marian-850 to-marian-800 text-white pt-8 pb-14 px-4 overflow-hidden">
+    <div class="max-w-7xl mx-auto relative z-10">
+      
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-amber-300 text-xs font-semibold mb-4 backdrop-blur-sm">
+          <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-400"></i>
+          Weekly Community Portal •
+        </div>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold font-cinzel tracking-tight text-white leading-tight">
+          Welcome to <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-200">St. Matthew</span> Community
+        </h1>
+        <p class="text-sm sm:text-base text-slate-200 mt-3 font-normal leading-relaxed">
+          Stay connected with our weekly Wednesday SCC service, Thursday Eucharistic Adoration, daily Catholic Mass readings, Holy Rosary meditations, and executive registers.
+        </p>
+      </div>
+
+      <!-- Quick Metrics Ribbon -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 mt-8">
+        
+        <div class="bg-white/10 border border-white/15 rounded-2xl p-4 backdrop-blur-md">
+          <div class="flex items-center justify-between text-slate-300 mb-1">
+            <span class="text-xs uppercase font-bold tracking-wider">Next SCC Service</span>
+            <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div class="text-lg font-bold text-white">Wednesday</div>
+          <p id="heroWedTime" class="text-xs text-amber-300 font-medium">7:30 PM – 9:30 PM</p>
+        </div>
+
+        <div class="bg-white/10 border border-white/15 rounded-2xl p-4 backdrop-blur-md">
+          <div class="flex items-center justify-between text-slate-300 mb-1">
+            <span class="text-xs uppercase font-bold tracking-wider">Adoration Day</span>
+            <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div class="text-lg font-bold text-white">Thursday</div>
+          <p id="heroThuTime" class="text-xs text-amber-300 font-medium">7:30 PM – 9:00 PM</p>
+        </div>
+
+        <div class="bg-white/10 border border-white/15 rounded-2xl p-4 backdrop-blur-md">
+          <div class="flex items-center justify-between text-slate-300 mb-1">
+            <span class="text-xs uppercase font-bold tracking-wider">Mass Animation</span>
+            <i data-lucide="mic" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div class="text-lg font-bold text-white" id="statAnimationCountdown">20th September 2026.</div>
+          <p class="text-xs text-slate-300 font-medium">St.Augustine Chaplainacy Catholic Church.</p>
+        </div>
+
+        <div class="bg-white/10 border border-white/15 rounded-2xl p-4 backdrop-blur-md">
+          <div class="flex items-center justify-between text-slate-300 mb-1">
+            <span class="text-xs uppercase font-bold tracking-wider">Semestral contribution</span>
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div class="text-lg font-bold text-emerald-300">KES 400 / KES 100</div>
+          <p class="text-xs text-slate-300 font-medium">Animation fee</p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN APPLICATION CONTENT WRAPPER -->
+  <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 -mt-6 space-y-10 relative z-20 pb-20">
+
+    <!-- ==================== SECTION: LIVE VENUE & SERVICE ALERT CARDS ==================== -->
+    <section id="venues" class="scroll-mt-24 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="p-1 rounded bg-amber-100 text-amber-800">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </span>
+            <h2 class="text-xl font-bold font-cinzel text-marian-900 tracking-wide">Live Weekly Venues & Alerts</h2>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500">Official meeting locations and guidelines updated weekly by the executive committee.</p>
+        </div>
+        <button onclick="openVenueModal()" class="self-start sm:self-auto text-xs font-semibold text-marian-700 hover:text-marian-900 flex items-center gap-1.5 underline underline-offset-4">
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> Test Editing These Venues
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <!-- WEDNESDAY CARD -->
+        <article class="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200/80 flex flex-col justify-between relative overflow-hidden group">
+          <div class="absolute top-0 right-0 bg-marian-850 text-amber-300 text-[11px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-bl-2xl shadow-sm">
+            Wednesdays
+          </div>
+
+          <div>
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-marian-50 text-marian-700 border border-marian-100 flex items-center justify-center text-xl shadow-xs">
+                <i data-lucide="users" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-marian-900">SCC Fellowship & Service</h3>
+                <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span id="cardWedTime" class="font-medium text-slate-700">7:30 PM – 9:30 PM</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3 mb-5">
+              <div class="flex items-start space-x-3">
+                <div class="p-1.5 rounded-lg bg-rose-100 text-rose-600 mt-0.5">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <span class="text-[11px] uppercase font-bold text-slate-400 tracking-wider block">Meeting Venue & Host</span>
+                  <p id="cardWedVenue" class="text-sm font-bold text-slate-900">Block 3, Room 14 (Host: Bro. Dennis Gitau)</p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-3 pt-2.5 border-t border-slate-200/60">
+                <div class="p-1.5 rounded-lg bg-amber-100 text-amber-700 mt-0.5">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <span class="text-[11px] uppercase font-bold text-slate-400 tracking-wider block">Animator & Focus of Week</span>
+                  <p id="cardWedNotes" class="text-xs text-slate-600">Animation by Sister Clara Mutua. Gospel discussion on the Good Samaritan, Intercessory Rosary, and semestral logistics check.</p>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-200/60 text-slate-500">
+                <span class="flex items-center gap-1">
+                  <i data-lucide="hourglass" class="w-3.5 h-3.5 text-marian-700"></i> Time Until Service:
+                </span>
+                <span id="wedCountdownBadge" class="font-bold text-marian-800 bg-marian-50 px-2 py-0.5 rounded border border-marian-100">Calculating...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <button onclick="shareWednesdayReminder()" class="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-semibold shadow-sm transition flex items-center justify-center space-x-2">
+              <i data-lucide="share" class="w-4 h-4"></i>
+              <span>Share Wednesday Notice</span>
+            </button>
+            <button onclick="copyReminderText('wednesday')" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span>Copy</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- THURSDAY CARD -->
+        <article class="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200/80 flex flex-col justify-between relative overflow-hidden group">
+          <div class="absolute top-0 right-0 bg-liturgical-gold text-white text-[11px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-bl-2xl shadow-sm">
+            Thursdays
+          </div>
+
+          <div>
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center text-xl shadow-xs">
+                <i data-lucide="sun" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-marian-900">Holy Hour & Eucharistic Adoration</h3>
+                <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span id="cardThuTime" class="font-medium text-slate-700">7:30 PM – 9:00 PM</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-amber-50/40 rounded-2xl p-4 border border-amber-100 space-y-3 mb-5">
+              <div class="flex items-start space-x-3">
+                <div class="p-1.5 rounded-lg bg-amber-100 text-amber-700 mt-0.5">
+                  <i data-lucide="church" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <span class="text-[11px] uppercase font-bold text-slate-400 tracking-wider block">Adoration Chapel</span>
+                  <p id="cardThuVenue" class="text-sm font-bold text-slate-900">Taita Taveta University Chapel (Main Sanctuary - AB2-003)</p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-3 pt-2.5 border-t border-amber-200/50">
+                <div class="p-1.5 rounded-lg bg-marian-100 text-marian-700 mt-0.5">
+                  <i data-lucide="heart" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <span class="text-[11px] uppercase font-bold text-slate-400 tracking-wider block">Liturgical Guidelines & Silence</span>
+                  <p id="cardThuNotes" class="text-xs text-slate-600">Reverent silence observed upon entering. Benediction, Divine Mercy Chaplet, and personal guided meditation before the Blessed Sacrament.</p>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs pt-2 border-t border-amber-200/50 text-slate-500">
+                <span class="flex items-center gap-1">
+                  <i data-lucide="hourglass" class="w-3.5 h-3.5 text-amber-700"></i> Time Until Adoration:
+                </span>
+                <span id="thuCountdownBadge" class="font-bold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-200">Calculating...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <button onclick="shareThursdayReminder()" class="flex-1 py-3 px-4 rounded-xl bg-marian-800 hover:bg-marian-900 active:scale-[0.98] text-amber-300 text-xs font-semibold shadow-sm transition flex items-center justify-center space-x-2">
+              <i data-lucide="share" class="w-4 h-4"></i>
+              <span>Share Adoration Reminder</span>
+            </button>
+            <button onclick="copyReminderText('thursday')" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span>Copy</span>
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ==================== SECTION: UPCOMING MILESTONES & COUNTDOWN ==================== -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      
+      <!-- Animation Day Countdown Card -->
+      <article class="bg-gradient-to-br from-marian-950 via-marian-900 to-marian-850 text-white rounded-3xl p-6 shadow-sm border border-marian-800 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-400/30">
+                <i data-lucide="music" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="text-xs uppercase font-bold tracking-wider text-amber-300">Milestone</span>
+                <h3 class="text-base font-bold text-white font-cinzel">Sunday Mass Animation</h3>
+              </div>
+            </div>
+            <span class="text-[11px] bg-white/10 px-2.5 py-1 rounded-full text-slate-200 font-medium">Duty Sunday</span>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+            Small Christian Community on duty is privileged to animate the main campus Sunday Mass! Please attend the readings and prayers of the faithfuls preparation rehearsals on Saturday afternoon and to do general cleaning and chair arrangement.
+          </p>
+
+          <!-- Dynamic Counter Matrix -->
+          <div class="grid grid-cols-4 gap-2.5 text-center my-6">
+            <div class="bg-white/10 rounded-2xl p-3 border border-white/10">
+              <span id="animDays" class="block text-2xl font-extrabold text-amber-400">12</span>
+              <span class="text-[10px] text-slate-300 uppercase tracking-wider font-semibold">Days</span>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-3 border border-white/10">
+              <span id="animHours" class="block text-2xl font-extrabold text-white">09</span>
+              <span class="text-[10px] text-slate-300 uppercase tracking-wider font-semibold">Hours</span>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-3 border border-white/10">
+              <span id="animMins" class="block text-2xl font-extrabold text-white">44</span>
+              <span class="text-[10px] text-slate-300 uppercase tracking-wider font-semibold">Mins</span>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-3 border border-white/10">
+              <span id="animSecs" class="block text-2xl font-extrabold text-amber-300">20</span>
+              <span class="text-[10px] text-slate-300 uppercase tracking-wider font-semibold">Secs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs">
+          <span class="text-slate-300">General cleaning: <strong>Saturday at 5:00 PM</strong></span>
+          <button onclick="shareAnimationNotice()" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1">
+            Notify Small Christian Community on duty &rarr;
+          </button>
+        </div>
+      </article>
+
+      <!-- Semestral & Animation Fee Contribution Tracker -->
+      <article class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100">
+                <i data-lucide="coins" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Treasury Notice</span>
+                <h3 class="text-base font-bold text-marian-900 font-cinzel">Contribution Submission</h3>
+              </div>
+            </div>
+            <span class="text-[11px] bg-rose-50 text-rose-600 font-bold px-2.5 py-1 rounded-full border border-rose-100">Deadline Passed</span>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            All registered members are requested to remit their semestral contribution fee (<strong class="text-slate-800">KES 400</strong>) and mass animation fee (<strong class="text-slate-800">KES 100</strong>) to the SCC Treasurer.
+          </p>
+
+          <div class="my-5 bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+            <div class="flex justify-between text-xs font-semibold">
+              <span class="text-slate-600">Collection Target Progress</span>
+              <span class="text-emerald-700 font-bold">KES 9,040 / KES 12,800 (70.63%)</span>
+            </div>
+            <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500" style="width: 63%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500">
+              <span>Treasurer: <strong>Mercy Gacheri</strong></span>
+              <span class="text-slate-700 font-medium">M-PESA / Cash Accepted</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="text-slate-500">Final deadline: <strong>Saturday 24th October, 2026</strong></span>
+          <a href="#community" class="text-marian-700 hover:text-marian-900 font-bold flex items-center gap-1">
+            Check Register &rarr;
+          </a>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ==================== SECTION: SPIRITUAL CENTER (READINGS, ROSARY & PRAYERS) ==================== -->
+    <section id="spiritual" class="scroll-mt-24 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+      
+      <!-- Sub-Navigation Header -->
+      <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="p-1 rounded bg-marian-100 text-marian-800">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+            </span>
+            <h2 class="text-lg font-bold font-cinzel text-marian-900">Spiritual Center & Liturgy</h2>
+          </div>
+          <p class="text-xs text-slate-500">Access scripture, daily rosary mysteries, and community prayers</p>
+        </div>
+
+        <!-- Tab Switches -->
+        <div class="flex items-center bg-slate-200/80 p-1 rounded-2xl text-xs font-semibold self-start md:self-auto custom-scroll overflow-x-auto">
+          <button id="subTabReadings" onclick="switchSpiritualTab('readings')" class="px-4 py-2 rounded-xl transition bg-white text-marian-950 shadow-xs">
+            Daily Readings
+          </button>
+          <button id="subTabRosary" onclick="switchSpiritualTab('rosary')" class="px-4 py-2 rounded-xl transition text-slate-600 hover:text-marian-900">
+            The Holy Rosary
+          </button>
+          <button id="subTabPrayers" onclick="switchSpiritualTab('prayers')" class="px-4 py-2 rounded-xl transition text-slate-600 hover:text-marian-900">
+            Community Prayers
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB PANEL 1: DAILY READINGS -->
+      <div id="panelReadings" class="p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+          <div>
+            <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Liturgical Readings of the Day</span>
+            <h3 class="text-xl font-bold font-cinzel text-marian-900">Scripture Meditation</h3>
+          </div>
+          <div class="flex items-center space-x-2 text-xs bg-slate-100 px-3 py-1.5 rounded-xl text-slate-600">
+            <span>Font Size:</span>
+            <button onclick="adjustReadingFont(-1)" class="w-6 h-6 rounded bg-white font-bold hover:bg-slate-200 shadow-xs">A-</button>
+            <button onclick="adjustReadingFont(1)" class="w-6 h-6 rounded bg-white font-bold hover:bg-slate-200 shadow-xs">A+</button>
+          </div>
+        </div>
+
+        <div id="readingsContent" class="space-y-6 text-sm leading-relaxed text-slate-700">
+          
+          <!-- First Reading -->
+          <div class="bg-slate-50 p-5 rounded-2xl border-l-4 border-marian-700 space-y-2">
+            <span class="text-[11px] font-bold text-marian-800 uppercase tracking-wider block">First Reading</span>
+            <h4 class="font-bold text-base text-slate-900">Sirach 35:12-14, 16-18</h4>
+            <p class="italic text-slate-600 text-xs sm:text-sm">"The prayer of the humble pierces the clouds."</p>
+            <p class="pt-2 text-slate-700">
+              The Lord is a God of justice, who knows no favorites. Though not unduly partial toward the weak, yet he hears the cry of the oppressed. The Lord is not deaf to the wail of the orphan, nor to the widow when she pours out her complaint. The one whose service is pleasing to God will be accepted; their prayer reaches unto the clouds.
+            </p>
+          </div>
+
+          <!-- Responsorial Psalm -->
+          <div class="bg-amber-50/40 p-5 rounded-2xl border-l-4 border-liturgical-gold space-y-2">
+            <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">Responsorial Psalm</span>
+            <h4 class="font-bold text-base text-slate-900">Psalm 34:2-3, 17-18, 19, 23</h4>
+            <div class="bg-amber-100/70 p-3 rounded-xl font-semibold text-marian-950 text-xs sm:text-sm">
+              <strong class="text-amber-800">R.</strong> The Lord hears the cry of the poor.
+            </div>
+            <p class="pt-2 text-slate-700 space-y-2">
+              I will bless the Lord at all times; his praise shall be ever in my mouth.<br>
+              Let my soul glory in the Lord; the lowly will hear me and be glad.<br>
+              When the just cry out, the Lord hears them, and from all their distress he rescues them.
+            </p>
+          </div>
+
+          <!-- Holy Gospel -->
+          <div class="bg-marian-50/60 p-5 rounded-2xl border-l-4 border-marian-900 space-y-2">
+            <span class="text-[11px] font-bold text-marian-900 uppercase tracking-wider block">The Holy Gospel</span>
+            <h4 class="font-bold text-base text-slate-900">Luke 18:9-14</h4>
+            <p class="italic text-slate-600 text-xs sm:text-sm">"The tax collector went home justified, but not the Pharisee."</p>
+            <p class="pt-2 text-slate-700">
+              Jesus addressed this parable to those who were convinced of their own righteousness and despised everyone else: "Two people went up to the temple area to pray; one was a Pharisee and the other a tax collector. The Pharisee took up his position and spoke this prayer: 'O God, I thank you that I am not like the rest of humanity—greedy, dishonest, adulterous—or even like this tax collector.'
+              <br><br>
+              "But the tax collector stood off at a distance and would not even raise his eyes to heaven but beat his breast and prayed, 'O God, be merciful to me a sinner.' I tell you, the latter went home justified, not the former; for whoever exalts himself will be humbled, and the one who humbles himself will be exalted."
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB PANEL 2: THE HOLY ROSARY -->
+      <div id="panelRosary" class="p-6 sm:p-8 space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+          <div>
+            <h3 class="text-xl font-bold font-cinzel text-marian-900">The Holy Rosary Guide</h3>
+            <p class="text-xs text-slate-500">Day-guided contemplative meditation on the life of Christ and Our Lady</p>
+          </div>
+          <div id="currentDayMysteryBadge" class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-300 self-start sm:self-auto">
+            Today: Joyful Mysteries
+          </div>
+        </div>
+
+        <!-- Mystery selector buttons -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <button id="btnJoyful" onclick="setRosaryMystery('joyful')" class="p-3 rounded-2xl border text-center transition font-semibold text-xs bg-marian-900 text-white border-marian-900 shadow-sm">
+            <span class="block text-sm">Joyful</span>
+            <span class="text-[10px] opacity-75 font-normal">Mon & Sat</span>
+          </button>
+          <button id="btnSorrowful" onclick="setRosaryMystery('sorrowful')" class="p-3 rounded-2xl border text-center transition font-semibold text-xs bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+            <span class="block text-sm">Sorrowful</span>
+            <span class="text-[10px] opacity-75 font-normal">Tue & Fri</span>
+          </button>
+          <button id="btnGlorious" onclick="setRosaryMystery('glorious')" class="p-3 rounded-2xl border text-center transition font-semibold text-xs bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+            <span class="block text-sm">Glorious</span>
+            <span class="text-[10px] opacity-75 font-normal">Wed & Sun</span>
+          </button>
+          <button id="btnLuminous" onclick="setRosaryMystery('luminous')" class="p-3 rounded-2xl border text-center transition font-semibold text-xs bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+            <span class="block text-sm">Luminous</span>
+            <span class="text-[10px] opacity-75 font-normal">Thursday</span>
+          </button>
+        </div>
+
+        <!-- Dynamic mystery card body -->
+        <div id="rosaryMysteryContent" class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- TAB PANEL 3: COMMUNITY PRAYERS -->
+      <div id="panelPrayers" class="p-6 sm:p-8 space-y-6 hidden">
+        <div class="pb-4 border-b border-slate-100">
+          <h3 class="text-xl font-bold font-cinzel text-marian-900">Community & Patron Prayers</h3>
+          <p class="text-xs text-slate-500">Recitations used in opening and concluding our weekly Jumuiya gatherings</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          
+          <!-- Prayer to St. Matthew -->
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center space-x-2 text-marian-800">
+              <i data-lucide="shield" class="w-4 h-4 text-amber-600"></i>
+              <h4 class="font-bold text-base text-slate-900 font-cinzel">Prayer to St. Matthew the Apostle</h4>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pt-2">
+              O Glorious Saint Matthew, through the grace of God you left the desire for worldly riches behind to follow Jesus Christ. Pray for our Small Christian Community that we may faithfully respond to God's divine call, live in unity, and generously share our gifts and talents for the growth of His Church. Teach us integrity, humility, and dedication in our daily studies and Christian service. Amen.
+            </p>
+          </div>
+
+          <!-- St. Matthew SCC Community Prayer -->
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center space-x-2 text-marian-800">
+              <i data-lucide="heart-handshake" class="w-4 h-4 text-amber-600"></i>
+              <h4 class="font-bold text-base text-slate-900 font-cinzel">SCC Family Commitment Prayer</h4>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pt-2">
+              Heavenly Father, we thank you for gathering us as brothers and sisters in the St. Matthew Small Christian Community. May your Holy Spirit animate our weekly fellowships and Eucharistic Adorations. Help us to support each other in times of hardship and celebrate each other's triumphs. Keep our hearts united in love and fidelity to the Catholic faith. We make our prayer through Christ our Lord. Amen.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== SECTION: LEADERSHIP & MEMBERS ROSTER ==================== -->
+    <section id="community" class="scroll-mt-24 space-y-6">
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="p-1 rounded bg-amber-100 text-amber-800">
+            <i data-lucide="users-round" class="w-4 h-4"></i>
+          </span>
+          <h2 class="text-xl font-bold font-cinzel text-marian-900 tracking-wide">Leadership Council & Community Roster</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500">Executive coordinators serving St. Matthew SCC for the current academic year.</p>
+      </div>
+
+      <!-- Executive Committee Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        
+        <!-- Chairperson -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center space-x-3.5 mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-marian-100 text-marian-900 font-bold flex items-center justify-center font-cinzel text-lg">
+              EK
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base">Elijah Kiamba</h4>
+              <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">SCC Moderator / Chair</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-4">
+            Coordinates overall community activities, oversees weekly fellowships, and liaises with the parish executive council.
+          </p>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500">Year 3 • Civil Engineering</span>
+            <a href="tel:+254700000001" class="text-marian-700 font-semibold flex items-center gap-1 hover:underline">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i> Contact
+            </a>
+          </div>
+        </div>
+
+        <!-- Vice Chairperson -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center space-x-3.5 mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 font-bold flex items-center justify-center font-cinzel text-lg">
+              MK
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base">Mary Kyale</h4>
+              <span class="text-xs font-semibold text-marian-800 bg-marian-50 px-2 py-0.5 rounded-full border border-marian-200">Vice Chairperson</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-4">
+            Supports the chairperson, coordinates Wednesday venue rotations, and oversees member welfare and hospitality.
+          </p>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500">Year 4 • Education science</span>
+            <a href="tel:+254700000002" class="text-marian-700 font-semibold flex items-center gap-1 hover:underline">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i> Contact
+            </a>
+          </div>
+        </div>
+
+        <!-- Secretary -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center space-x-3.5 mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-900 font-bold flex items-center justify-center font-cinzel text-lg">
+              EM
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base">Emmanuel Mwambu</h4>
+              <span class="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">Secretary & Records</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-4">
+            Maintains the attendance register, records meeting minutes, and dispatches weekly communications.
+          </p>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500">Year 3 • Education Arts</span>
+            <a href="tel:+254700000003" class="text-marian-700 font-semibold flex items-center gap-1 hover:underline">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i> Contact
+            </a>
+          </div>
+        </div>
+
+        <!-- Treasurer -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center space-x-3.5 mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-900 font-bold flex items-center justify-center font-cinzel text-lg">
+              MG
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base">Mercy Gacheri</h4>
+              <span class="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Treasurer</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-4">
+            Manages semestral dues and the Sunday animation fund, providing financial transparency reports.
+          </p>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500">Year 2 • Education Science</span>
+            <a href="tel:+254700000004" class="text-marian-700 font-semibold flex items-center gap-1 hover:underline">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i> Contact
+            </a>
+          </div>
+        </div>
+
+        <!-- Liturgy Coordinator -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center space-x-3.5 mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-900 font-bold flex items-center justify-center font-cinzel text-lg">
+              BT
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base">Boniface Thairu</h4>
+              <span class="text-xs font-semibold text-purple-800 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">Liturgy Coordinator</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-4">
+            Coordinates readers, altar servers, and Eucharistic Adoration logistics for Thursday evenings.
+          </p>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500">Year 2 • Mechanical Engineering</span>
+            <a href="tel:+254700000005" class="text-marian-700 font-semibold flex items-center gap-1 hover:underline">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i> Contact
+            </a>
+          </div>
+        </div>
+
+        <!-- Animation Coordinator -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center space-x-3.5 mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-900 font-bold flex items-center justify-center font-cinzel text-lg">
+              DN
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base">Dennis Njoroge</h4>
+              <span class="text-xs font-semibold text-rose-800 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">Organising Secretary</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-4">
+            Confirms and prepares host venues, Prepares and distributes hymnals and readings, and helps the liturgist confirm who will lead prayers, readings, and hymns, Sends out weekly announcements and reminders (via WhatsApp or SMS) for Wednesday services, Thursday Adoration, and Sunday services, Coordinates rehearsal schedules, liturgical vestments, offertory gifts, and procession arrangements when the community animates Mass, Organizes home visits to sick or bereaved members, welcomes newcomers, and arranges refreshments for community fellowships, and Steps in to take minutes or record attendance when the main secretary is away, and helps relay announcements from the parish or chaplaincy council.
+          </p>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500">Year 3 • Information Technology</span>
+            <a href="tel:+254700000006" class="text-marian-700 font-semibold flex items-center gap-1 hover:underline">
+              <i data-lucide="phone" class="w-3.5 h-3.5">+254758506390</i> Contact
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Searchable Community Members Roster Demo -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="font-bold text-base text-slate-900 font-cinzel">Community Member Directory (Roster Demo)</h3>
+            <p class="text-xs text-slate-500">Search active members and check semestral contribution list registration status</p>
+          </div>
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <input type="text" id="memberSearchInput" oninput="filterMemberTable()" placeholder="Search by name or year..." class="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-marian-600 transition">
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-700 border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold">
+                <th class="py-3 px-3">Member Name</th>
+                <th class="py-3 px-3">Year / Course</th>
+                <th class="py-3 px-3">Semestral contribution (400/-)</th>
+                <th class="py-3 px-3">Animation fee (100/-)</th>
+                <th class="py-3 px-3">Attendance</th>
+              </tr>
+            </thead>
+            <tbody id="memberTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== LEADER'S VENUE & EVENT MODAL (LIVE TEST EDITOR) ==================== -->
+  <div id="venueModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-lg font-bold font-cinzel text-marian-900">Leader Venue & Alert Editor</h3>
+          <p class="text-xs text-slate-500">Test updating this week's locations live in the interface</p>
+        </div>
+        <button onclick="closeVenueModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="venueEditForm" onsubmit="saveVenueChanges(event)" class="space-y-4 text-xs">
+        
+        <!-- Wednesday Config -->
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+          <span class="font-bold text-marian-900 block text-sm">Wednesday SCC Service</span>
+          
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Venue & Host Room</label>
+            <input type="text" id="inputWedVenue" required class="w-full p-2.5 rounded-xl border border-slate-300 text-slate-800 bg-white focus:ring-2 focus:ring-marian-600">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Time</label>
+              <input type="text" id="inputWedTime" required class="w-full p-2.5 rounded-xl border border-slate-300 text-slate-800 bg-white">
+            </div>
+            <div>
+              <label class="block text-slate-600 font-semibold mb-1">Animator</label>
+              <input type="text" id="inputWedAnimator" required class="w-full p-2.5 rounded-xl border border-slate-300 text-slate-800 bg-white">
+            </div>
+          </div>
+        </div>
+
+        <!-- Thursday Config -->
+        <div class="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/70 space-y-3">
+          <span class="font-bold text-amber-900 block text-sm">Thursday Eucharistic Adoration</span>
+          
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Adoration Venue</label>
+            <input type="text" id="inputThuVenue" required class="w-full p-2.5 rounded-xl border border-slate-300 text-slate-800 bg-white">
+          </div>
+
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Adoration Time</label>
+            <input type="text" id="inputThuTime" required class="w-full p-2.5 rounded-xl border border-slate-300 text-slate-800 bg-white">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeVenueModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-marian-900 hover:bg-marian-800 text-amber-300 font-bold transition shadow-sm">
+            Save & Update Banners
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST FEEDBACK NOTIFICATION -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 bg-marian-950 text-white border border-amber-400/40 px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50">
+    <div class="p-1 rounded bg-amber-500/20 text-amber-400">
+      <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+    </div>
+    <span id="toastMessage" class="text-xs font-medium">Notification triggered</span>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-marian-950 text-slate-400 text-xs py-8 px-4 border-t border-marian-850">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2 text-slate-300">
+        <i data-lucide="cross" class="w-4 h-4 text-amber-400"></i>
+        <span class="font-cinzel font-bold text-white">St. Matthew Small Christian Community</span>
+      </div>
+      <p class="text-center sm:text-right">
+        St. Augustine Chaplainacy Catholic Student Community • "For where two or three are gathered in my name, there am I among them." — Matthew 18:20
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT APPLICATION LOGIC ==================== -->
+  <script>
+    // State storage for weekly venues and activities
+    const sccState = {
+      wednesday: {
+        venue: "Block 3, Room 14 (Host: Bro. Dennis Njoroge)",
+        time: "7:30 PM – 9:30 PM",
+        animator: "Dennis Njoroge",
+        notes: "Gospel discussion on the Good Samaritan, Intercessory Rosary, and semestral logistics check."
+      },
+      thursday: {
+        venue: "Taita Taveta University Chapel (Main Sanctuary- AB2-003)",
+        time: "7:30 PM – 9:00 PM",
+        notes: "Reverent silence observed upon entering. Benediction, Divine Mercy Chaplet, and personal guided meditation before the Blessed Sacrament."
+      },
+      currentFontSize: 14,
+      demoMembers: [
+        { name: "Elijah Kiamba", year: "Yr 3 Engineering", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Mary Kyale", year: "Yr 4 Education Science", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Mercy Gacheri", year: "Yr 2 Education Science", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Emmanuel Mwambu", year: "Yr 3 Education Arts", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Dennis Njoroge", year: "Yr 3 Information Technology", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Boniface Thairu", year: "Yr 2 Engineering", semestral: "Partially Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Ivyne Cherono", year: "Yr 3 Education Science", semestral: "Partially Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Rodgers Kahindi", year: "Yr 4 Business(Information Technology)", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Brenda Jepkorir", year: "Yr 3 Education Science", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Charity Chepleting", year: "Yr 2 Education Science", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "David Lemelin", year: "Yr 4 Education Arts", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Fidelis Nyanguthii", year: "Yr 2 Education Arts", semestral: "Partially Paid", animation: "Fully Paid", attendance: "" },
+        { name: "George Nziri", year: "Yr 4 Education Science", semestral: "Pending", animation: "Pending", attendance: "" },
+        { name: "Samuel Kyalo", year: "Yr 3 Information Technology", semestral: "Partially Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Joan Irungu", year: "Yr 4 English Literature", semestral: "Pending", animation: "Pending", attendance: "" },
+        { name: "Josephine Mwende", year: "Yr 3 Education Arts", semestral: "Pending", animation: "Fully Paid", attendance: "" },
+        { name: "Elijah Kimani", year: "Yr 3 Information Technology", semestral: "Pending", animation: "Pending", attendance: "" },
+        { name: "Annette Nyawira", year: "Yr 2 Engineering", semestral: "Pending", animation: "Pending", attendance: "" },
+        { name: "Elizabeth Awino", year: "Yr 1 Education", semestral: "Fully Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Mitchel Mikal", year: "Yr 1 Education", semestral: "Fully Paid", animation: "Pending", attendance: "" },
+        { name: "Gilbert Kiptoo", year: "Yr 1 Education", semestral: "Partially Paid", animation: "Fully Paid", attendance: "" },
+        { name: "Scott Wambua", year: "Yr 1 Education", semestral: "Partially Paid", animation: "Pending", attendance: "" },
+        { name: "Victoria Ndanu", year: "Yr 1 English Literature", semestral: "Partially Paid", animation: "Pending", attendance: "" },
+        { name: "Chelsea Atieno", year: "Yr 1 Education Arts", semestral: "Partially Paid", animation: "Pending", attendance: "" },
+        { name: "Mary Benedetta", year: "Yr 3 Education Arts", semestral: "Partially Paid", animation: "Pending", attendance: "" },
+        { name: "Faith Mueni", year: "Yr 2 Education Science", semestral: "Partially Paid", animation: "Pending", attendance: "" },
+        { name: "Felix Kithuka", year: "Yr 3 Education Science", semestral: "Fully Paid", animation: "Pending", attendance: "" },
+        { name: "Vida Patrick", year: "Yr 3 Education Science", semestral: "Pending", animation: "Pending", attendance: "" },
+        { name: "Augustine Kimuyu", year: "Yr 1 Engineering", semestral: "Partially Paid", animation: "Pending", attendance: "" },
+        { name: "Daisy Kosgei", year: "Yr 2 Education Science", semestral: "Partially Paid", animation: "Pending", attendance: "" },
+        { name: "Albert Odhiambo", year: "Yr 3 Education Arts", semestral: "Pending", animation: "Pending", attendance: "" },
+        { name: "Byrone Ochieng", year: "Yr 1 English Literature", semestral: "Pending", animation: "Pending", attendance: "" },
+        { name: "Victor Ogwera", year: "Auminae Education Science", semestral: "Pending", animation: "FullyPaid", attendance: "" },
+        { name: "Monicah Ndanu", year: "Aluminae Education Science", semestral: "Pending", animation: "Pending", attendance: "" },
+      ]
+    };
+
+    // Mysteries dataset
+    const rosaryData = {
+      joyful: {
+        title: "The Joyful Mysteries (Mondays & Saturdays)",
+        theme: "Meditation on the Incarnation and early life of our Lord",
+        mysteries: [
+          "1. The Annunciation to Mary by the Archangel Gabriel (Luke 1:26-38)",
+          "2. The Visitation of Mary to her cousin Elizabeth (Luke 1:39-56)",
+          "3. The Nativity of our Lord Jesus in Bethlehem (Luke 2:1-20)",
+          "4. The Presentation of the Child Jesus in the Temple (Luke 2:22-38)",
+          "5. The Finding of the Child Jesus in the Temple (Luke 2:41-52)"
+        ]
+      },
+      sorrowful: {
+        title: "The Sorrowful Mysteries (Tuesdays & Fridays)",
+        theme: "Meditation on the Passion and Crucifixion of Christ",
+        mysteries: [
+          "1. The Agony of Jesus in the Garden of Gethsemane (Matthew 26:36-46)",
+          "2. The Scourging of Jesus at the Pillar (Matthew 27:26)",
+          "3. The Crowning with Thorns and Mockery (Matthew 27:27-31)",
+          "4. The Carrying of the Cross to Mount Calvary (Luke 23:26-32)",
+          "5. The Crucifixion and Death of Our Lord Jesus Christ (John 19:17-30)"
+        ]
+      },
+      glorious: {
+        title: "The Glorious Mysteries (Wednesdays & Sundays)",
+        theme: "Meditation on the Resurrection and Divine Glory",
+        mysteries: [
+          "1. The Glorious Resurrection of Jesus from the Dead (John 20:1-18)",
+          "2. The Ascension of Jesus into Heaven (Acts 1:6-12)",
+          "3. The Descent of the Holy Spirit at Pentecost (Acts 2:1-13)",
+          "4. The Assumption of the Blessed Virgin Mary into Heaven",
+          "5. The Coronation of Mary as Queen of Heaven and Earth"
+        ]
+      },
+      luminous: {
+        title: "The Luminous Mysteries (Thursdays)",
+        theme: "Meditation on the Public Ministry and Light of Christ",
+        mysteries: [
+          "1. The Baptism of Jesus in the Jordan River (Matthew 3:13-17)",
+          "2. The Self-Manifestation at the Wedding of Cana (John 2:1-11)",
+          "3. The Proclamation of the Kingdom of God and Repentance (Mark 1:14-15)",
+          "4. The Transfiguration of Jesus on Mount Tabor (Luke 9:28-36)",
+          "5. The Institution of the Holy Eucharist at the Last Supper (Matthew 26:26-30)"
+        ]
+      }
+    };
+
+    // Initialize application on page load
+    window.onload = function() {
+      lucide.createIcons();
+      updateLiturgicalDate();
+      renderMemberTable(sccState.demoMembers);
+      selectTodayMystery();
+      updateWeeklyCountdowns();
+      setInterval(updateWeeklyCountdowns, 1000);
+    };
+
+    // Calculate dynamic dates and liturgical information
+    function updateLiturgicalDate() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateString = now.toLocaleDateString('en-US', options);
+      document.getElementById('liturgicalDate').textContent = dateString + " • St. Matthew SCC Community";
+    }
+
+    // Auto-detect Catholic Rosary mystery based on day of week
+    function selectTodayMystery() {
+      const day = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      let mysteryKey = "joyful";
+
+      if (day === 1 || day === 6) mysteryKey = "joyful"; // Mon & Sat
+      else if (day === 2 || day === 5) mysteryKey = "sorrowful"; // Tue & Fri
+      else if (day === 3 || day === 0) mysteryKey = "glorious"; // Wed & Sun
+      else if (day === 4) mysteryKey = "luminous"; // Thursday
+
+      setRosaryMystery(mysteryKey);
+    }
+
+    // Set Rosary Mystery display
+    function setRosaryMystery(key) {
+      const data = rosaryData[key];
+      const container = document.getElementById('rosaryMysteryContent');
+      
+      const badge = document.getElementById('currentDayMysteryBadge');
+      badge.textContent = "Selected: " + data.title.split(' (')[0];
+
+      // Update button styling
+      ['Joyful', 'Sorrowful', 'Glorious', 'Luminous'].forEach(name => {
+        const btn = document.getElementById('btn' + name);
+        if (name.toLowerCase() === key) {
+          btn.className = "p-3 rounded-2xl border text-center transition font-semibold text-xs bg-marian-900 text-white border-marian-900 shadow-sm";
+        } else {
+          btn.className = "p-3 rounded-2xl border text-center transition font-semibold text-xs bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+        }
+      });
+
+      let listHtml = data.mysteries.map(item => `
+        <div class="flex items-start space-x-3 p-3 rounded-xl bg-white border border-slate-100 shadow-xs">
+          <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+            ✝
+          </div>
+          <span class="text-xs sm:text-sm text-slate-800 font-medium">${item}</span>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div>
+          <h4 class="font-bold text-base text-marian-900 font-cinzel">${data.title}</h4>
+          <p class="text-xs text-slate-500 mt-0.5">${data.theme}</p>
+        </div>
+        <div class="space-y-2 pt-2">
+          ${listHtml}
+        </div>
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200/60 text-xs text-amber-900">
+          <strong>Tip for Leader:</strong> Recite the Apostles' Creed, 1 Our Father, 3 Hail Marys for Faith, Hope, and Charity, and 1 Glory Be prior to beginning the 5 decades.
+        </div>
+      `;
+    }
+
+    // Switch between Readings, Rosary, and Prayers sub-tabs
+    function switchSpiritualTab(tab) {
+      const panelReadings = document.getElementById('panelReadings');
+      const panelRosary = document.getElementById('panelRosary');
+      const panelPrayers = document.getElementById('panelPrayers');
+
+      const btnReadings = document.getElementById('subTabReadings');
+      const btnRosary = document.getElementById('subTabRosary');
+      const btnPrayers = document.getElementById('subTabPrayers');
+
+      panelReadings.classList.add('hidden');
+      panelRosary.classList.add('hidden');
+      panelPrayers.classList.add('hidden');
+
+      [btnReadings, btnRosary, btnPrayers].forEach(b => {
+        b.className = "px-4 py-2 rounded-xl transition text-slate-600 hover:text-marian-900";
+      });
+
+      if (tab === 'readings') {
+        panelReadings.classList.remove('hidden');
+        btnReadings.className = "px-4 py-2 rounded-xl transition bg-white text-marian-950 shadow-xs font-bold";
+      } else if (tab === 'rosary') {
+        panelRosary.classList.remove('hidden');
+        btnRosary.className = "px-4 py-2 rounded-xl transition bg-white text-marian-950 shadow-xs font-bold";
+      } else if (tab === 'prayers') {
+        panelPrayers.classList.remove('hidden');
+        btnPrayers.className = "px-4 py-2 rounded-xl transition bg-white text-marian-950 shadow-xs font-bold";
+      }
+    }
+
+    // Adjust Scripture reading font size
+    function adjustReadingFont(direction) {
+      sccState.currentFontSize = Math.max(12, Math.min(20, sccState.currentFontSize + direction));
+      const container = document.getElementById('readingsContent');
+      container.style.fontSize = sccState.currentFontSize + 'px';
+    }
+
+    // Render searchable member table
+    function renderMemberTable(members) {
+      const tbody = document.getElementById('memberTableBody');
+      if (members.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">No member found matching your search.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = members.map(m => `
+        <tr class="hover:bg-slate-50/70 transition">
+          <td class="py-3 px-3 font-semibold text-slate-800">${m.name}</td>
+          <td class="py-3 px-3 text-slate-500">${m.year}</td>
+          <td class="py-3 px-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${m.semestral === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${m.semestral}
+            </span>
+          </td>
+          <td class="py-3 px-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${m.animation === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${m.animation}
+            </span>
+          </td>
+          <td class="py-3 px-3 font-semibold text-slate-700">${m.attendance}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Filter members in real-time
+    function filterMemberTable() {
+      const query = document.getElementById('memberSearchInput').value.toLowerCase();
+      const filtered = sccState.demoMembers.filter(m => 
+        m.name.toLowerCase().includes(query) || m.year.toLowerCase().includes(query)
+      );
+      renderMemberTable(filtered);
+    }
+
+    // Venue modal controls
+    function openVenueModal() {
+      document.getElementById('inputWedVenue').value = sccState.wednesday.venue;
+      document.getElementById('inputWedTime').value = sccState.wednesday.time;
+      document.getElementById('inputWedAnimator').value = sccState.wednesday.animator;
+
+      document.getElementById('inputThuVenue').value = sccState.thursday.venue;
+      document.getElementById('inputThuTime').value = sccState.thursday.time;
+
+      document.getElementById('venueModal').classList.remove('hidden');
+    }
+
+    function closeVenueModal() {
+      document.getElementById('venueModal').classList.add('hidden');
+    }
+
+    function saveVenueChanges(e) {
+      e.preventDefault();
+
+      sccState.wednesday.venue = document.getElementById('inputWedVenue').value;
+      sccState.wednesday.time = document.getElementById('inputWedTime').value;
+      sccState.wednesday.animator = document.getElementById('inputWedAnimator').value;
+
+      sccState.thursday.venue = document.getElementById('inputThuVenue').value;
+      sccState.thursday.time = document.getElementById('inputThuTime').value;
+
+      // Update UI components
+      document.getElementById('cardWedVenue').textContent = sccState.wednesday.venue;
+      document.getElementById('cardWedTime').textContent = sccState.wednesday.time;
+      document.getElementById('heroWedTime').textContent = sccState.wednesday.time;
+      document.getElementById('cardWedNotes').textContent = `Animation by ${sccState.wednesday.animator}. Intercessory Rosary, Scripture reflection, and check-in.`;
+
+      document.getElementById('cardThuVenue').textContent = sccState.thursday.venue;
+      document.getElementById('cardThuTime').textContent = sccState.thursday.time;
+      document.getElementById('heroThuTime').textContent = sccState.thursday.time;
+
+      closeVenueModal();
+      showToast("Venue and meeting details updated successfully!");
+    }
+
+    // WhatsApp Reminder Formatter
+    function shareWednesdayReminder() {
+      const text = encodeURIComponent(
+        `*St. Matthew Small Christian Community (SCC)*\n` +
+        `🔔 *WEDNESDAY SERVICE REMINDER*\n\n` +
+        `📍 *Venue:* ${sccState.wednesday.venue}\n` +
+        `⏰ *Time:* ${sccState.wednesday.time}\n` +
+        `📖 *Animator:* ${sccState.wednesday.animator}\n\n` +
+        `Come let us pray, read the Word, and fellowship as brothers and sisters in Christ. All are warmly welcome!`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function shareThursdayReminder() {
+      const text = encodeURIComponent(
+        `*St. Matthew Small Christian Community (SCC)*\n` +
+        `🕊️ *HOLY HOUR & EUCHARISTIC ADORATION*\n\n` +
+        `📍 *Venue:* ${sccState.thursday.venue}\n` +
+        `⏰ *Time:* ${sccState.thursday.time}\n\n` +
+        `"Could you not watch with me one hour?" (Mt 26:40)\n` +
+        `Join us for quiet prayer, Benediction, and the Divine Mercy Chaplet before the Blessed Sacrament.`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function shareWeeklyBroadcast() {
+      const text = encodeURIComponent(
+        `*St. Matthew SCC - Weekly Guide*\n` +
+        `1️⃣ *Wednesday SCC Service:* ${sccState.wednesday.time} at ${sccState.wednesday.venue}\n` +
+        `2️⃣ *Thursday Holy Hour Adoration:* ${sccState.thursday.time} at ${sccState.thursday.venue}\n` +
+        `3️⃣ *Sunday Mass Animation Duty:* Please remember choir rehearsals on Saturday at 2:30 PM.\n` +
+        `4️⃣ *Semestral & Animation dues:* Please remit to Treasurer Sis. Mercy Gacheri.`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function shareAnimationNotice() {
+      const text = encodeURIComponent(
+        `*Small christian community on duty*\n` +
+        `Small christian community on duty to perform general cleaning, arrange chairs and rehearse on readings & prayers of the faithfuls on Saturday at 5:00 PM in the Main Chapel(St.Augustine Chaplainacy). Please be punctual!`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function copyReminderText(type) {
+      let copyStr = "";
+      if (type === 'wednesday') {
+        copyStr = `St. Matthew SCC Wednesday Service Reminder:\nVenue: ${sccState.wednesday.venue}\nTime: ${sccState.wednesday.time}\nAnimator: ${sccState.wednesday.animator}`;
+      } else {
+        copyStr = `St. Matthew SCC Thursday Adoration Reminder:\nVenue: ${sccState.thursday.venue}\nTime: ${sccState.thursday.time}`;
+      }
+      
+      const el = document.createElement('textarea');
+      el.value = copyStr;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      showToast("Reminder copied to clipboard!");
+    }
+
+    // Dynamic Live Countdown calculation
+    function updateWeeklyCountdowns() {
+      const now = new Date();
+
+      // Wednesday calculation
+      const wed = getNextDayOfWeek(now, 3, 17, 30); // Wednesday 5:30 PM
+      const diffWed = wed - now;
+      if (diffWed > 0) {
+        const h = Math.floor(diffWed / (1000 * 60 * 60));
+        const m = Math.floor((diffWed % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById('wedCountdownBadge').textContent = `In ${h}h ${m}m`;
+      } else {
+        document.getElementById('wedCountdownBadge').textContent = `Fellowship in session!`;
+      }
+
+      // Thursday calculation
+      const thu = getNextDayOfWeek(now, 4, 18, 0); // Thursday 6:00 PM
+      const diffThu = thu - now;
+      if (diffThu > 0) {
+        const h = Math.floor(diffThu / (1000 * 60 * 60));
+        const m = Math.floor((diffThu % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById('thuCountdownBadge').textContent = `In ${h}h ${m}m`;
+      } else {
+        document.getElementById('thuCountdownBadge').textContent = `Adoration in session!`;
+      }
+    }
+
+    function getNextDayOfWeek(date, dayOfWeek, hour, minute) {
+      const resultDate = new Date(date.getTime());
+      resultDate.setDate(date.getDate() + ((7 + dayOfWeek - date.getDay()) % 7));
+      resultDate.setHours(hour, minute, 0, 0);
+      if (resultDate <= date) {
+        resultDate.setDate(resultDate.getDate() + 7);
+      }
+      return resultDate;
+    }
+
+    // Toast utility
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMessage');
+      msg.textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

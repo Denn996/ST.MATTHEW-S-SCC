@@ -79,7 +79,13 @@
           {% endfor %}
         {% endif %}
 
-        <form method="POST" action="{% url 'signup' %}" class="space-y-4">
+        <!-- Client-side Validation Banner -->
+        <div id="clientErrorBanner" class="hidden p-3.5 rounded-2xl text-xs font-medium flex items-center gap-2.5 bg-rose-50 text-rose-800 border border-rose-200">
+          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+          <span id="clientErrorText"></span>
+        </div>
+
+        <form id="signupForm" method="POST" action="{% url 'signup' %}" onsubmit="return validateSignupForm(event)" class="space-y-4">
           {% csrf_token %}
 
           <!-- Full Name Grid -->
@@ -87,12 +93,20 @@
             <div>
               <label for="first_name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">First Name</label>
               <input type="text" id="first_name" name="first_name" required placeholder="e.g. Dennis"
+                pattern="[A-Za-z]+"
+                title="First name must contain letters only (A–Z, no numbers or spaces)"
+                oninput="enforceLettersOnly(this, 'firstNameError')"
                 class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
+              <p id="firstNameError" class="hidden text-[11px] text-rose-600 font-medium mt-1">Letters only (numbers &amp; symbols removed).</p>
             </div>
             <div>
               <label for="last_name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Last Name</label>
               <input type="text" id="last_name" name="last_name" required placeholder="e.g. Njoroge"
+                pattern="[A-Za-z]+"
+                title="Last name must contain letters only (A–Z, no numbers or spaces)"
+                oninput="enforceLettersOnly(this, 'lastNameError')"
                 class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
+              <p id="lastNameError" class="hidden text-[11px] text-rose-600 font-medium mt-1">Letters only (numbers &amp; symbols removed).</p>
             </div>
           </div>
 
@@ -100,8 +114,12 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Username</label>
-              <input type="text" id="username" name="username" required placeholder="Choose a username"
+              <input type="text" id="username" name="username" required placeholder="Letters only (e.g. dennoh)"
+                pattern="[A-Za-z]+"
+                title="Username must contain letters only (A–Z, no numbers or spaces)"
+                oninput="enforceLettersOnly(this, 'usernameError')"
                 class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
+              <p id="usernameError" class="hidden text-[11px] text-rose-600 font-medium mt-1">Letters only (numbers &amp; symbols removed).</p>
             </div>
             <div>
               <label for="phone" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Phone (WhatsApp)</label>
@@ -125,16 +143,32 @@
           </div>
 
           <!-- Passwords -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label for="password1" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Password</label>
-              <input type="password" id="password1" name="password1" required placeholder="Create password"
-                class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
+          <div class="space-y-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label for="password1" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+                <input type="password" id="password1" name="password1" required placeholder="Create password"
+                  minlength="8"
+                  pattern="(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}"
+                  title="At least 8 characters with letters, numbers, and a special character (e.g. @, #, $, !)"
+                  oninput="checkPasswordRules()"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
+              </div>
+              <div>
+                <label for="password2" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Confirm Password</label>
+                <input type="password" id="password2" name="password2" required placeholder="Repeat password"
+                  oninput="checkPasswordRules()"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
+              </div>
             </div>
-            <div>
-              <label for="password2" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Confirm Password</label>
-              <input type="password" id="password2" name="password2" required placeholder="Repeat password"
-                class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
+
+            <!-- Live Password Checklist -->
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-[11px] flex flex-wrap gap-x-3 gap-y-1 text-slate-500">
+              <span id="ruleLength" class="font-medium">• 8+ chars</span>
+              <span id="ruleLetter" class="font-medium">• Letter (A–Z)</span>
+              <span id="ruleNumber" class="font-medium">• Number (0–9)</span>
+              <span id="ruleSpecial" class="font-medium">• Special (@#$!)</span>
+              <span id="ruleMatch" class="font-medium">• Passwords match</span>
             </div>
           </div>
 
@@ -165,6 +199,80 @@
 
   <script>
     lucide.createIcons();
+
+    // Strip numbers/symbols immediately on First Name, Last Name, and Username
+    function enforceLettersOnly(input, errorId) {
+      const original = input.value;
+      const cleaned = original.replace(/[^A-Za-z]/g, '');
+      const errEl = document.getElementById(errorId);
+
+      if (original !== cleaned) {
+        input.value = cleaned;
+        errEl.classList.remove('hidden');
+      } else {
+        errEl.classList.add('hidden');
+      }
+    }
+
+    // Live password requirement indicator
+    function checkPasswordRules() {
+      const pw1 = document.getElementById('password1').value;
+      const pw2 = document.getElementById('password2').value;
+
+      const setRuleState = (id, passed) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = passed
+          ? 'font-bold text-emerald-600'
+          : 'font-medium text-rose-600';
+      };
+
+      setRuleState('ruleLength', pw1.length >= 8);
+      setRuleState('ruleLetter', /[A-Za-z]/.test(pw1));
+      setRuleState('ruleNumber', /\d/.test(pw1));
+      setRuleState('ruleSpecial', /[^A-Za-z0-9]/.test(pw1));
+      setRuleState('ruleMatch', pw1.length > 0 && pw1 === pw2);
+    }
+
+    // Final validation gate on form submit
+    function validateSignupForm(event) {
+      const firstName = document.getElementById('first_name').value.trim();
+      const lastName = document.getElementById('last_name').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const pw1 = document.getElementById('password1').value;
+      const pw2 = document.getElementById('password2').value;
+
+      const lettersRegex = /^[A-Za-z]+$/;
+      const strongPasswordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+      const showError = (msg) => {
+        event.preventDefault();
+        const banner = document.getElementById('clientErrorBanner');
+        document.getElementById('clientErrorText').textContent = msg;
+        banner.classList.remove('hidden');
+        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+      };
+
+      if (!lettersRegex.test(firstName)) {
+        return showError("First Name must contain letters only (no numbers or symbols).");
+      }
+      if (!lettersRegex.test(lastName)) {
+        return showError("Last Name must contain letters only (no numbers or symbols).");
+      }
+      if (!lettersRegex.test(username)) {
+        return showError("Username must contain letters only (no numbers or symbols).");
+      }
+      if (!strongPasswordRegex.test(pw1)) {
+        return showError("Password must be at least 8 characters and include letters, numbers, and a special character (e.g., @, #, $, !).");
+      }
+      if (pw1 !== pw2) {
+        return showError("Password and Confirm Password do not match.");
+      }
+
+      document.getElementById('clientErrorBanner').classList.add('hidden');
+      return true;
+    }
   </script>
 </body>
 </html>

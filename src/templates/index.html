@@ -1260,28 +1260,50 @@
     // Dynamic Live Countdown calculation
     function updateWeeklyCountdowns() {
       const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
 
-      // Wednesday calculation
-      const wed = getNextDayOfWeek(now, 3, 17, 30); // Wednesday 5:30 PM
+      // 1. Wednesday SCC Service (Wednesdays at 7:30 PM)
+      const wed = getNextDayOfWeek(now, 3, 19, 30);
       const diffWed = wed - now;
       if (diffWed > 0) {
-        const h = Math.floor(diffWed / (1000 * 60 * 60));
-        const m = Math.floor((diffWed % (1000 * 60 * 60)) / (1000 * 60));
-        document.getElementById('wedCountdownBadge').textContent = `In ${h}h ${m}m`;
+        const d = Math.floor(diffWed / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diffWed / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diffWed / (1000 * 60)) % 60);
+        document.getElementById('wedCountdownBadge').textContent = d > 0 ? `In ${d}d ${h}h ${m}m` : `In ${h}h ${m}m`;
       } else {
         document.getElementById('wedCountdownBadge').textContent = `Fellowship in session!`;
       }
 
-      // Thursday calculation
-      const thu = getNextDayOfWeek(now, 4, 18, 0); // Thursday 6:00 PM
+      // 2. Thursday Eucharistic Adoration (Thursdays at 7:30 PM)
+      const thu = getNextDayOfWeek(now, 4, 19, 30);
       const diffThu = thu - now;
       if (diffThu > 0) {
-        const h = Math.floor(diffThu / (1000 * 60 * 60));
-        const m = Math.floor((diffThu % (1000 * 60 * 60)) / (1000 * 60));
-        document.getElementById('thuCountdownBadge').textContent = `In ${h}h ${m}m`;
+        const d = Math.floor(diffThu / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diffThu / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diffThu / (1000 * 60)) % 60);
+        document.getElementById('thuCountdownBadge').textContent = d > 0 ? `In ${d}d ${h}h ${m}m` : `In ${h}h ${m}m`;
       } else {
         document.getElementById('thuCountdownBadge').textContent = `Adoration in session!`;
       }
+
+      // 3. Sunday Mass Animation Countdown (Sundays at 10:30 AM)
+      const sun = getNextDayOfWeek(now, 0, 10, 30);
+      const diffSun = Math.max(0, sun - now);
+
+      const animDays  = Math.floor(diffSun / (1000 * 60 * 60 * 24));
+      const animHours = Math.floor((diffSun / (1000 * 60 * 60)) % 24);
+      const animMins  = Math.floor((diffSun / (1000 * 60)) % 60);
+      const animSecs  = Math.floor((diffSun / 1000) % 60);
+
+      const elDays  = document.getElementById('animDays');
+      const elHours = document.getElementById('animHours');
+      const elMins  = document.getElementById('animMins');
+      const elSecs  = document.getElementById('animSecs');
+
+      if (elDays)  elDays.textContent  = pad(animDays);
+      if (elHours) elHours.textContent = pad(animHours);
+      if (elMins)  elMins.textContent  = pad(animMins);
+      if (elSecs)  elSecs.textContent  = pad(animSecs);
     }
 
     function getNextDayOfWeek(date, dayOfWeek, hour, minute) {

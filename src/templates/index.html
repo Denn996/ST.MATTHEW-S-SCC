@@ -1010,9 +1010,41 @@
       }
     };
 
+    // Sync sccState with localStorage (shared with Calendar & Venues page)
+    function loadSavedVenues() {
+      const savedHost = JSON.parse(localStorage.getItem('scc_active_host'));
+      const savedAdoration = JSON.parse(localStorage.getItem('scc_adoration'));
+
+      if (savedHost) {
+        sccState.wednesday.venue = `${savedHost.venue} (Host: ${savedHost.name})`;
+        sccState.wednesday.animator = savedHost.animator;
+        if (savedHost.focus) {
+          sccState.wednesday.notes = savedHost.focus;
+        }
+      }
+      if (savedAdoration && savedAdoration.venue) {
+        sccState.thursday.venue = savedAdoration.venue;
+      }
+    }
+
+    // Apply current sccState values to the Home page cards immediately
+    function applyVenueStateToUI() {
+      document.getElementById('cardWedVenue').textContent = sccState.wednesday.venue;
+      document.getElementById('cardWedTime').textContent = sccState.wednesday.time;
+      document.getElementById('heroWedTime').textContent = sccState.wednesday.time;
+      document.getElementById('cardWedNotes').textContent =
+        `Animation by ${sccState.wednesday.animator}. ${sccState.wednesday.notes}`;
+
+      document.getElementById('cardThuVenue').textContent = sccState.thursday.venue;
+      document.getElementById('cardThuTime').textContent = sccState.thursday.time;
+      document.getElementById('heroThuTime').textContent = sccState.thursday.time;
+    }
+
     // Initialize application on page load
     window.onload = function() {
       lucide.createIcons();
+      loadSavedVenues();
+      applyVenueStateToUI();
       updateLiturgicalDate();
       renderMemberTable(sccState.demoMembers);
       selectTodayMystery();
@@ -1181,18 +1213,22 @@
       sccState.thursday.venue = document.getElementById('inputThuVenue').value;
       sccState.thursday.time = document.getElementById('inputThuTime').value;
 
-      // Update UI components
-      document.getElementById('cardWedVenue').textContent = sccState.wednesday.venue;
-      document.getElementById('cardWedTime').textContent = sccState.wednesday.time;
-      document.getElementById('heroWedTime').textContent = sccState.wednesday.time;
-      document.getElementById('cardWedNotes').textContent = `Animation by ${sccState.wednesday.animator}. Intercessory Rosary, Scripture reflection, and check-in.`;
+      // Persist to localStorage so updates stay active across reloads and sync with Calendar
+      const existingHost = JSON.parse(localStorage.getItem('scc_active_host')) || {};
+      localStorage.setItem('scc_active_host', JSON.stringify({
+        name: existingHost.name || "Bro. Dennis Njoroge",
+        venue: sccState.wednesday.venue,
+        animator: sccState.wednesday.animator,
+        hymn: existingHost.hymn || "Bwana Ni Mchungaji / Amazing Grace",
+        focus: sccState.wednesday.notes
+      }));
+      localStorage.setItem('scc_adoration', JSON.stringify({
+        venue: sccState.thursday.venue
+      }));
 
-      document.getElementById('cardThuVenue').textContent = sccState.thursday.venue;
-      document.getElementById('cardThuTime').textContent = sccState.thursday.time;
-      document.getElementById('heroThuTime').textContent = sccState.thursday.time;
-
+      applyVenueStateToUI();
       closeVenueModal();
-      showToast("Venue and meeting details updated successfully!");
+      showToast("Venue, host, and animator updated and saved!");
     }
 
     // WhatsApp Reminder Formatter

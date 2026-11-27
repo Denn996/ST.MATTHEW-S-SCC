@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -52,7 +52,7 @@ def treasury(request):
 
 
 def signup(request):
-    """Handles new member signup via signup.html and holds the account in pending state."""
+    """Handles new member signup via registration/signup.html and holds the account in pending state."""
     if request.user.is_authenticated:
         return redirect('index')
 
@@ -71,7 +71,7 @@ def signup(request):
         if len(last_name) < 3 or not last_name.isalpha():
             messages.error(request, "Last name must contain at least 3 letters.")
             return redirect("signup")
-        
+
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return redirect("signup")
@@ -94,7 +94,7 @@ def signup(request):
             request,
             "Registration submitted! Your account is awaiting St. Matthew SCC admin approval before you can log in."
         )
-        return redirect("registration/login.html")
+        return redirect("login")
 
     return render(request, "registration/signup.html")
 
@@ -119,7 +119,7 @@ def login(request):
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
+            auth_login(request, user)
             next_url = request.GET.get('next') or request.POST.get('next') or 'index'
             return redirect(next_url)
         else:
@@ -153,7 +153,7 @@ def approve_member(request, user_id):
     CommunityMember.objects.get_or_create(full_name=full_name)
 
     messages.success(request, f"{full_name} has been approved and added to the community directory.")
-    return redirect('pending_approvals.html')
+    return redirect('pending_approvals')
 
 
 @staff_member_required(login_url='login')
@@ -164,4 +164,4 @@ def reject_member(request, user_id):
     username = member.username
     member.delete()
     messages.error(request, f"Registration request for {username} was rejected and removed.")
-    return redirect('pending_approvals.html')
+    return redirect('pending_approvals')

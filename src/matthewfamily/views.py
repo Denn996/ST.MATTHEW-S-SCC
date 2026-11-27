@@ -9,6 +9,8 @@ from matthewfamily.models import CommunityMember, WeeklyService
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 
 
 @login_required(login_url='login')
@@ -114,6 +116,8 @@ def signup(request):
 
     return render(request, "registration/signup.html")
 
+@never_cache
+@csrf_protect
 def login(request):
     """Authenticates only admin-approved (is_active=True) members."""
     if request.user.is_authenticated:

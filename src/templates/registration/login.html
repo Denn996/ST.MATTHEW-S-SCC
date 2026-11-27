@@ -85,14 +85,14 @@
           </div>
         {% endif %}
 
-        <form method="POST" action="{% url 'login' %}" class="space-y-4">
+        <form method="post" action="{% url 'login' %}" class="space-y-4">
           {% csrf_token %}
 
           <div>
             <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Username</label>
             <div class="relative">
               <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-              <input type="text" id="username" name="username" required autofocus placeholder="Enter your username"
+              <input type="text" id="username" name="username" autocomplete="username" required autofocus placeholder="Enter your username"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
             </div>
           </div>
@@ -103,15 +103,17 @@
             </div>
             <div class="relative">
               <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-              <input type="password" id="password" name="password" required placeholder="••••••••"
+              <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="••••••••"
                 class="w-full pl-10 pr-10 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-300 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-marian-700 transition">
-              <button type="button" onclick="togglePassword('password', 'eyeIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+              <button type="button" onclick="togglePassword('password', 'eyeIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600" aria-label="Toggle password visibility">
                 <i id="eyeIcon" data-lucide="eye" class="w-4 h-4"></i>
               </button>
             </div>
           </div>
 
-          <input type="hidden" name="next" value="{{ next }}">
+          {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+          {% endif %}
 
           <button type="submit" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-marian-900 to-marian-800 hover:from-marian-950 hover:to-marian-900 text-amber-300 font-bold text-sm shadow-md shadow-marian-900/20 active:scale-[0.99] transition flex items-center justify-center gap-2">
             <i data-lucide="log-in" class="w-4 h-4"></i>
@@ -143,7 +145,11 @@
     lucide.createIcons();
     function togglePassword(inputId, iconId) {
       const input = document.getElementById(inputId);
-      input.type = input.type === 'password' ? 'text' : 'password';
+      const icon = document.getElementById(iconId);
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+      lucide.createIcons();
     }
   </script>
 </body>

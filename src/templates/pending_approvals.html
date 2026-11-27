@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Member Approval Queue | St. Matthew SCC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <!-- Top Navigation Bar -->
+  <nav class="bg-white border-b border-slate-200 px-6 py-4">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2 font-bold text-slate-800 text-lg">
+        <i data-lucide="shield" class="w-5 h-5 text-emerald-600"></i>
+        <span>St. Matthew SCC Admin</span>
+      </div>
+      <div class="flex items-center gap-4 text-sm">
+        <a href="{% url 'index' %}" class="text-slate-600 hover:text-slate-900 font-medium">Back to Portal</a>
+        <form method="post" action="{% url 'logout' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="text-rose-600 hover:text-rose-700 font-medium cursor-pointer">Logout</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto p-6">
+
+    <!-- Django Flash Messages (Approve / Reject feedback) -->
+    {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for message in messages %}
+          <div class="p-3.5 rounded-lg text-sm font-medium border
+            {% if 'success' in message.tags %} bg-emerald-50 text-emerald-800 border-emerald-200
+            {% elif 'error' in message.tags %} bg-rose-50 text-rose-800 border-rose-200
+            {% else %} bg-amber-50 text-amber-800 border-amber-200 {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800">Member Approval Queue</h1>
+        <p class="text-sm text-slate-500">Verify St. Matthew SCC members before granting portal access.</p>
+      </div>
+      <span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">
+        {{ pending_users.count }} Pending
+      </span>
+    </div>
+
+    <!-- Pending Members Table -->
+    {% if pending_users %}
+      <div class="bg-white shadow-sm border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="py-3 px-4">Member</th>
+              <th class="py-3 px-4">Email</th>
+              <th class="py-3 px-4">Registered</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            {% for member in pending_users %}
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 px-4 font-medium text-slate-800">
+                {{ member.get_full_name|default:member.username }}
+                <span class="block text-xs text-slate-400">@{{ member.username }}</span>
+              </td>
+              <td class="py-3 px-4 text-slate-600">{{ member.email|default:"—" }}</td>
+              <td class="py-3 px-4 text-slate-500 whitespace-nowrap">{{ member.date_joined|date:"M d, Y H:i" }}</td>
+              <td class="py-3 px-4 text-right space-x-2 whitespace-nowrap">
+                <form method="post" action="{% url 'approve_member' member.id %}" class="inline">
+                  {% csrf_token %}
+                  <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg cursor-pointer">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Approve
+                  </button>
+                </form>
+                <form method="post" action="{% url 'reject_member' member.id %}" class="inline" onsubmit="return confirm('Reject and delete this registration?');">
+                  {% csrf_token %}
+                  <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium rounded-lg cursor-pointer">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i> Reject
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="bg-white border border-slate-200 rounded-xl p-10 text-center text-slate-500">
+        <i data-lucide="shield-check" class="w-10 h-10 mx-auto mb-2 text-emerald-500"></i>
+        <p class="font-medium text-slate-700">No pending registrations</p>
+        <p class="text-xs mt-1">All St. Matthew SCC member requests have been reviewed.</p>
+      </div>
+    {% endif %}
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

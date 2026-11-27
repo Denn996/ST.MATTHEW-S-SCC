@@ -1,17 +1,16 @@
-import re
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
-
 from matthewfamily.models import CommunityMember, WeeklyService
 
 
 @login_required(login_url='login')
 def index(request):
     if request.method == 'POST':
-        # Save Wednesday updates
         WeeklyService.objects.update_or_create(
             service_day='WEDNESDAY',
             defaults={
@@ -21,7 +20,6 @@ def index(request):
                 'notes': f"Animation by {request.POST.get('wed_animator')}. Intercessory Rosary, Scripture reflection, and check-in.",
             }
         )
-        # Save Thursday updates
         WeeklyService.objects.update_or_create(
             service_day='THURSDAY',
             defaults={
@@ -53,93 +51,117 @@ def treasury(request):
     return render(request, 'treasury.html')
 
 
-def signup_view(request):
+def signup(request):
+    """Handles new member signup via signup.html and holds the account in pending state."""
     if request.user.is_authenticated:
-        return redirect('login')
+        return redirect('index')
 
-    if request.method == 'POST':
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
-        password1 = request.POST.get('password1', '')
-        password2 = request.POST.get('password2', '')
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
 
-        # 1. Letters-only validation (A-Z / a-z only; no digits, spaces, or symbols)
-        letters_only_pattern = r'^[A-Za-z]+$'
+        if len(first_name) < 3 or not first_name.isalpha():
+            messages.error(request, "First name must contain at least 3 letters.")
+            return redirect("signup")
 
-        if not re.match(letters_only_pattern, first_name):
-            messages.error(request, 'First Name must contain letters only (no numbers or special characters).')
-            return render(request, 'registration/signup.html')
+        if len(last_name) < 3 or not last_name.isalpha():
+            messages.error(request, "Last name must contain at least 3 letters.")
+            return redirect("signup")
+        
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect("signup")
 
-        if not re.match(letters_only_pattern, last_name):
-            messages.error(request, 'Last Name must contain letters only (no numbers or special characters).')
-            return render(request, 'registration/signup.html')
-
-        if not re.match(letters_only_pattern, username):
-            messages.error(request, 'Username must contain letters only (no numbers or special characters).')
-            return render(request, 'registration/signup.html')
-
-        # 2. Password complexity validation (8+ chars, letters, numbers, special characters)
-        has_letter = bool(re.search(r'[A-Za-z]', password1))
-        has_number = bool(re.search(r'\d', password1))
-        has_special = bool(re.search(r'[^A-Za-z0-9]', password1))
-
-        if len(password1) < 8 or not (has_letter and has_number and has_special):
-            messages.error(
-                request,
-                'Password must be at least 8 characters long and include letters, numbers, and a special character (e.g., @, #, $, !).'
-            )
-            return render(request, 'registration/signup.html')
-
-        if password1 != password2:
-            messages.error(request, 'Passwords do not match. Please try again.')
-            return render(request, 'registration/signup.html')
-
-        # 3. Uniqueness checks (case-insensitive for username and email)
-        if User.objects.filter(username__iexact=username).exists():
-            messages.error(request, 'That username is already taken. Choose another one.')
-            return render(request, 'registration/signup.html')
-
-        if User.objects.filter(email__iexact=email).exists():
-            messages.error(request, 'An account with this email already exists.')
-            return render(request, 'registration/signup.html')
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "That username is already taken.")
+            return redirect("signup")
 
         user = User.objects.create_user(
             username=username,
             email=email,
-            password=password1,
             first_name=first_name,
             last_name=last_name,
+            password=password,
         )
+        user.is_active = False  # Blocks login until an admin approves
         user.save()
 
-        messages.success(request, 'Account created! Please sign in to access the St. Matthew SCC portal.')
-        return redirect('login')
+        messages.success(
+            request,
+            "Registration submitted! Your account is awaiting St. Matthew SCC admin approval before you can log in."
+        )
+        return redirect("registration/login.html")
 
-    return render(request, 'registration/signup.html')
+    return render(request, "registration/signup.html")
 
 
-def login_view(request):
+def login(request):
+    """Authenticates only admin-approved (is_active=True) members."""
     if request.user.is_authenticated:
         return redirect('index')
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
 
+        # Explicitly catch unapproved accounts before authenticate() returns None
+        existing_user = User.objects.filter(username=username).first()
+        if existing_user and not existing_user.is_active and existing_user.check_password(password):
+            messages.warning(
+                request,
+                "Your account is still pending approval from the St. Matthew SCC Admin."
+            )
+            return redirect('login')
+
+        user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            next_url = request.POST.get('next') or 'index'
+            next_url = request.GET.get('next') or request.POST.get('next') or 'index'
             return redirect(next_url)
         else:
-            messages.error(request, 'Invalid username or password. Need an account? Register below.')
+            messages.error(request, "Invalid username or password.")
 
-    return render(request, 'registration/login.html', {'next': request.GET.get('next', '')})
+    return render(request, 'registration/login.html')
 
 
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have been signed out safely.')
     return redirect('login')
+
+
+@staff_member_required(login_url='login')
+def pending_approvals(request):
+    """Admin-only queue of all unapproved member accounts."""
+    pending_users = User.objects.filter(is_active=False, is_staff=False).order_by('-date_joined')
+    return render(request, 'pending_approvals.html', {'pending_users': pending_users})
+
+
+@staff_member_required(login_url='login')
+@require_POST
+def approve_member(request, user_id):
+    """Activates a pending member and adds them to the CommunityMember directory."""
+    member = get_object_or_404(User, id=user_id, is_active=False)
+    member.is_active = True
+    member.save()
+
+    full_name = member.get_full_name().strip() or member.username
+    CommunityMember.objects.get_or_create(full_name=full_name)
+
+    messages.success(request, f"{full_name} has been approved and added to the community directory.")
+    return redirect('pending_approvals.html')
+
+
+@staff_member_required(login_url='login')
+@require_POST
+def reject_member(request, user_id):
+    """Deletes a rejected registration request."""
+    member = get_object_or_404(User, id=user_id, is_active=False)
+    username = member.username
+    member.delete()
+    messages.error(request, f"Registration request for {username} was rejected and removed.")
+    return redirect('pending_approvals.html')

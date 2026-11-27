@@ -156,6 +156,13 @@
             Treasury &amp; Register
           </a>
         </li>
+        <li>
+         {% if user.is_staff %}
+          <a href="{% url 'pending_approvals' %}" class="px-3 py-2 text-sm font-medium text-emerald-700 hover:text-emerald-900">
+             Approvals
+          </a>
+         {% endif %}
+        </li>
       </ul>
 
       <!-- Right: Leader & Alert Actions (Moved out of congested top bar) -->

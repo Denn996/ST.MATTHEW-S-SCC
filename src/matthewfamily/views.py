@@ -6,6 +6,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from matthewfamily.models import CommunityMember, WeeklyService
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
 
 
 @login_required(login_url='login')
@@ -90,6 +93,19 @@ def signup(request):
         user.is_active = False  # Blocks login until an admin approves
         user.save()
 
+        # Notify admin of the new pending member
+        approval_url = request.build_absolute_uri(reverse('pending_approvals'))
+        send_mail(
+            subject=f"New St. Matthew SCC Member Awaiting Approval: {user.get_full_name() or user.username}",
+            message=(
+                f"{user.get_full_name()} ({user.username}) just registered and is waiting for approval.\n\n"
+                f"Review and approve here: {approval_url}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.ADMIN_NOTIFICATION_EMAIL],
+            fail_silently=True,
+        )
+
         messages.success(
             request,
             "Registration submitted! Your account is awaiting St. Matthew SCC admin approval before you can log in."
@@ -97,7 +113,6 @@ def signup(request):
         return redirect("login")
 
     return render(request, "registration/signup.html")
-
 
 def login(request):
     """Authenticates only admin-approved (is_active=True) members."""

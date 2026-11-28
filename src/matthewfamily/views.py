@@ -82,10 +82,11 @@ def signup(request):
             messages.error(request, "Last name must contain at least 3 letters.")
             return redirect("signup")
 
-        if len(password) < 6:
-            messages.error(request, "Password must be at least 6 characters long.")
+        if not password:
+            messages.error(request, "Password cannot be empty.")
             return redirect("signup")
 
+        
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return redirect("signup")

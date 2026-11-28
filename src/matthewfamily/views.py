@@ -11,6 +11,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 @login_required(login_url='login')
@@ -62,12 +63,16 @@ def signup(request):
         return redirect('index')
 
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        email = request.POST.get("email", "").strip()
+        username = request.POST.get("username", "").strip().lower()
+        email = request.POST.get("email", "").strip().lower()
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm_password")
+        password = request.POST.get("password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+
+        if len(username) < 3:
+            messages.error(request, "Username must be at least 3 characters long.")
+            return redirect("signup")
 
         if len(first_name) < 3 or not first_name.isalpha():
             messages.error(request, "First name must contain at least 3 letters.")
@@ -77,11 +82,15 @@ def signup(request):
             messages.error(request, "Last name must contain at least 3 letters.")
             return redirect("signup")
 
+        if len(password) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+            return redirect("signup")
+
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return redirect("signup")
 
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(username__iexact=username).exists():
             messages.error(request, "That username is already taken.")
             return redirect("signup")
 
@@ -124,11 +133,11 @@ def login(request):
         return redirect('index')
 
     if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password')
+        username = request.POST.get('username', '').strip().lower()
+        password = request.POST.get('password', '')
 
         # Explicitly catch unapproved accounts before authenticate() returns None
-        existing_user = User.objects.filter(username=username).first()
+        existing_user = User.objects.filter(username__iexact=username).first()
         if existing_user and not existing_user.is_active and existing_user.check_password(password):
             messages.warning(
                 request,
@@ -136,22 +145,20 @@ def login(request):
             )
             return redirect('login')
 
-        user = authenticate(request, username=username, password=password)
+        # Use exact stored username in case an older account had uppercase letters
+        lookup_username = existing_user.username if existing_user else username
+        user = authenticate(request, username=lookup_username, password=password)
+
         if user is not None:
             auth_login(request, user)
-            next_url = request.GET.get('next') or request.POST.get('next') or 'index'
-            return redirect(next_url)
+            next_url = request.POST.get('next') or request.GET.get('next')
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
+            return redirect('index')
         else:
             messages.error(request, "Invalid username or password.")
 
     return render(request, 'registration/login.html')
-
-
-def logout_view(request):
-    logout(request)
-    messages.success(request, 'You have been signed out safely.')
-    return redirect('login')
-
 
 @staff_member_required(login_url='login')
 def pending_approvals(request):

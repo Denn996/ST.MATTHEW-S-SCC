@@ -160,6 +160,11 @@ def login(request):
 
     return render(request, 'registration/login.html')
 
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'You have been signed out safely.')
+    return redirect('login')
+
 @staff_member_required(login_url='login')
 def pending_approvals(request):
     """Admin-only queue of all unapproved member accounts."""
